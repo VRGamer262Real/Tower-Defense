@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fighter Defense</title>
+    <title>Fighter Defense - Blooket Style</title>
     <style>
         :root {
-            --purple: #a44cd3;
-            --dark-purple: #7d34a8;
-            --sidebar-bg: #8b4513;
-            --sidebar-accent: #5d2e0d;
-            --grass-light: #52c234;
-            --grass-dark: #45b62b;
+            --purple-ui: #9b59b6;
+            --sidebar-wood: #8b4513;
+            --sidebar-dark: #5d2e0d;
+            --btn-blue: #3498db;
+            --btn-green: #2ecc71;
             --ui-font: 'Arial Black', Gadget, sans-serif;
         }
 
@@ -28,104 +27,110 @@
             user-select: none;
         }
 
-        #game-container {
+        #game-area {
             width: 1100px;
             height: 750px;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 100px rgba(0,0,0,0.8);
-            border: 4px solid #333;
+            box-shadow: 0 0 80px rgba(0,0,0,0.8);
+            border: 5px solid #333;
+            border-radius: 15px;
+            overflow: hidden;
         }
 
+        /* Header Bar */
         #header {
             height: 60px;
-            background: var(--purple);
-            border-bottom: 5px solid var(--dark-purple);
+            background: var(--purple-ui);
+            border-bottom: 5px solid #8e44ad;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end;
             align-items: center;
             padding: 0 40px;
+            gap: 40px;
             font-size: 28px;
         }
 
-        #game-main {
+        .stat-box { display: flex; align-items: center; gap: 10px; }
+        .gold-icon { color: #f1c40f; }
+        .heart-icon { color: #e74c3c; }
+
+        /* Content Area */
+        #main-container {
             display: flex;
             flex: 1;
             background: #2c3e50;
         }
 
-        #canvas-holder {
+        #canvas-container {
             position: relative;
             flex: 1;
-            background: #27ae60;
         }
 
-        canvas {
-            display: block;
-        }
+        canvas { display: block; background: #27ae60; cursor: crosshair; }
 
+        /* Sidebar Styles */
         #sidebar {
-            width: 300px;
-            background: var(--sidebar-bg);
-            border-left: 6px solid var(--sidebar-accent);
+            width: 280px;
+            background: var(--sidebar-wood);
+            border-left: 6px solid var(--sidebar-dark);
             padding: 15px;
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
 
-        .round-display {
+        #round-card {
             background: #e74c3c;
             border: 4px solid #c0392b;
             border-radius: 12px;
-            padding: 10px;
+            padding: 12px;
             text-align: center;
-            font-size: 26px;
+            font-size: 24px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
         }
 
-        #fighter-grid {
+        #shop-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            max-height: 400px;
-            overflow-y: auto;
+            gap: 10px;
+            padding: 5px;
         }
 
-        .fighter-option {
+        .shop-item {
             background: rgba(0,0,0,0.3);
-            border-radius: 10px;
-            padding: 5px;
+            border-radius: 12px;
+            padding: 8px;
             text-align: center;
             cursor: pointer;
-            border: 3px solid transparent;
-            transition: 0.1s;
+            border: 4px solid transparent;
+            transition: transform 0.1s;
         }
 
-        .fighter-option.selected { border-color: #f1c40f; background: rgba(241, 196, 15, 0.2); }
+        .shop-item:hover { transform: scale(1.05); }
+        .shop-item.selected { border-color: #f1c40f; background: rgba(255, 255, 255, 0.15); }
 
-        .fighter-icon-box {
-            width: 60px;
-            height: 60px;
-            background: #fff;
+        .item-icon {
+            width: 55px; height: 55px;
+            background: #f1c40f;
             margin: 0 auto 5px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
             font-size: 35px;
             box-shadow: 0 4px 0 rgba(0,0,0,0.3);
         }
 
-        .cost-label {
+        .item-cost {
             background: #2980b9;
             font-size: 14px;
-            border-radius: 5px;
+            border-radius: 6px;
             padding: 2px 0;
             display: block;
         }
 
+        /* Action Panels */
         #upgrade-panel {
-            background: rgba(0,0,0,0.4);
+            background: rgba(0,0,0,0.5);
             border-radius: 12px;
             padding: 15px;
             display: none;
@@ -133,74 +138,58 @@
             gap: 10px;
         }
 
-        .action-btn {
-            border: none;
-            color: white;
-            padding: 12px;
-            font-size: 18px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-family: var(--ui-font);
-            text-align: center;
+        .btn {
+            border: none; color: white; padding: 12px;
+            font-size: 20px; border-radius: 12px;
+            cursor: pointer; font-family: var(--ui-font);
+            text-align: center; border-bottom: 6px solid rgba(0,0,0,0.2);
         }
 
-        #speed-btn {
-            background: #3498db;
-            border-bottom: 6px solid #2980b9;
-            margin-top: auto;
-        }
+        .btn:active { transform: translateY(2px); border-bottom-width: 4px; }
 
-        #upgrade-btn {
-            background: #2ecc71;
-            border-bottom: 6px solid #27ae60;
-        }
+        #speed-btn { background: var(--btn-blue); margin-top: auto; }
+        #upgrade-btn { background: var(--btn-green); }
 
         #game-over {
-            position: absolute;
-            inset: 0;
+            position: absolute; inset: 0;
             background: rgba(0,0,0,0.9);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            display: none; flex-direction: column;
+            justify-content: center; align-items: center;
             z-index: 100;
         }
     </style>
 </head>
 <body>
 
-    <div id="game-container">
+    <div id="game-area">
         <div id="header">
-            <div>FIGHTER DEFENSE</div>
-            <div style="display: flex; gap: 30px;">
-                <span><span id="gold">200</span> 🪙</span>
-                <span><span id="lives">100</span> ❤️</span>
-            </div>
+            <div class="stat-box"><span id="gold">150</span> <span class="gold-icon">🪙</span></div>
+            <div class="stat-box"><span id="lives">100</span> <span class="heart-icon">❤️</span></div>
         </div>
 
-        <div id="game-main">
-            <div id="canvas-holder">
-                <canvas id="gameCanvas" width="800" height="690"></canvas>
+        <div id="main-container">
+            <div id="canvas-container">
+                <canvas id="gameCanvas" width="820" height="690"></canvas>
                 <div id="game-over">
-                    <h1 style="font-size: 60px; color:#e74c3c">GAME OVER</h1>
-                    <p>Round Survived: <span id="final-round">1</span></p>
-                    <button class="action-btn" style="background:#3498db" onclick="location.reload()">REPLAY</button>
+                    <h1 style="font-size: 70px; color: #e74c3c; margin-bottom: 5px;">GAME OVER</h1>
+                    <p style="font-size: 24px;">Rounds Defended: <span id="final-round">0</span></p>
+                    <button class="btn" style="background:#3498db; width: 200px;" onclick="location.reload()">PLAY AGAIN</button>
                 </div>
             </div>
 
             <div id="sidebar">
-                <div class="round-display">Round <span id="round">1</span></div>
+                <div id="round-card">Round <span id="round">1</span></div>
                 
-                <div id="fighter-grid"></div>
+                <div id="shop-grid"><!-- Fighters injected here --></div>
 
                 <div id="upgrade-panel">
-                    <div id="upgrade-title" style="color:#f1c40f">Fighter Info</div>
-                    <div id="upgrade-stats" style="font-size:12px; font-family: sans-serif;">Lvl 1 | Dmg: 5 | Rng: 100</div>
-                    <button id="upgrade-btn" class="action-btn" onclick="upgradeFighter()">UPGRADE (<span id="up-cost">50</span> 🪙)</button>
-                    <button class="action-btn" style="background:#e74c3c; font-size:14px;" onclick="deselectFighter()">CLOSE</button>
+                    <div id="u-name" style="color:#f1c40f; font-size: 18px;">Fighter</div>
+                    <div id="u-stats" style="font-family: sans-serif; font-size: 13px; line-height: 1.4;">Level: 1<br>Dmg: 5 | Range: 100</div>
+                    <button id="upgrade-btn" class="btn" onclick="upgradeActiveFighter()">UPGRADE <br> (<span id="u-cost">50</span> 🪙)</button>
+                    <button class="btn" style="background:#e74c3c; font-size: 14px; padding: 5px;" onclick="closeUpgrade()">CLOSE</button>
                 </div>
 
-                <button id="speed-btn" class="action-btn" onclick="toggleSpeed()">
+                <button id="speed-btn" class="btn" onclick="toggleGameSpeed()">
                     ▶️ x1
                 </button>
             </div>
@@ -211,87 +200,91 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        const TILE_SIZE = 46;
-        const GRID_W = 17;
+        // Settings
+        const TILE_SIZE = 45;
+        const GRID_W = 18;
         const GRID_H = 15;
 
-        // Configuration
-        const FIGHTER_TYPES = [
-            { name: "Chick", icon: "🐥", cost: 30, range: 100, damage: 6, rate: 40 },
-            { name: "Squirrel", icon: "🐿️", cost: 50, range: 130, damage: 12, rate: 50 },
-            { name: "Owl", icon: "🦉", cost: 70, range: 160, damage: 10, rate: 25 },
-            { name: "Pig", icon: "🐷", cost: 40, range: 110, damage: 15, rate: 60 },
-            { name: "Monkey", icon: "🐒", cost: 100, range: 150, damage: 25, rate: 45 },
-            { name: "Dragon", icon: "🐉", cost: 200, range: 250, damage: 50, rate: 80 }
+        const FIGHTER_DATA = [
+            { name: "Chick", icon: "🐥", cost: 30, range: 100, damage: 8, rate: 45, color: "#f1c40f" },
+            { name: "Squirrel", icon: "🐿️", cost: 50, range: 130, damage: 15, rate: 55, color: "#e67e22" },
+            { name: "Monkey", icon: "🐒", cost: 70, range: 150, damage: 12, rate: 25, color: "#9b59b6" },
+            { name: "Pig", icon: "🐷", cost: 40, range: 110, damage: 20, rate: 65, color: "#ff9ff3" },
+            { name: "Alien", icon: "👽", cost: 100, range: 200, damage: 10, rate: 15, color: "#1dd1a1" },
+            { name: "Dragon", icon: "🐉", cost: 200, range: 250, damage: 60, rate: 80, color: "#ee5253" }
         ];
 
-        // Game State
-        let gold = 200;
+        // State
+        let gold = 150;
         let lives = 100;
         let round = 1;
         let gameSpeed = 1;
         let isGameOver = false;
-        let waveActive = false;
+        let activeWave = false;
+        let spawning = false;
         
         let fighters = [];
         let enemies = [];
         let projectiles = [];
-        let selectedFighterIdx = -1; // For purchasing
-        let activeFighter = null; // For upgrading
+        let selectedShopIdx = -1;
+        let activeSelection = null; // Currently clicked on-field fighter
 
-        // Path
-        const gridPath = [
-            {x: 0, y: 7}, {x: 5, y: 7}, {x: 5, y: 3}, {x: 12, y: 3},
-            {x: 12, y: 11}, {x: 3, y: 11}, {x: 3, y: 14}, {x: 17, y: 14}
-        ];
-        const pixelPath = gridPath.map(p => ({ x: p.x * TILE_SIZE + TILE_SIZE/2, y: p.y * TILE_SIZE + TILE_SIZE/2 }));
+        // Map Path (Pixel points)
+        const pathPoints = [
+            {x: 2, y: 0}, {x: 2, y: 4}, {x: 10, y: 4}, {x: 10, y: 9},
+            {x: 4, y: 9}, {x: 4, y: 13}, {x: 15, y: 13}, {x: 15, y: 7}, {x: 18, y: 7}
+        ].map(p => ({ x: p.x * TILE_SIZE + TILE_SIZE/2, y: p.y * TILE_SIZE + TILE_SIZE/2 }));
 
-        // Grid
-        const occupied = Array(GRID_H).fill().map(() => Array(GRID_W).fill(false));
+        // Grid blockers (path areas)
+        const gridBlocks = Array(GRID_H).fill().map(() => Array(GRID_W).fill(false));
 
         // Initialization
-        function initGrid() {
-            const gridDiv = document.getElementById('fighter-grid');
-            FIGHTER_TYPES.forEach((f, i) => {
-                const div = document.createElement('div');
-                div.className = 'fighter-option';
-                div.id = `f-${i}`;
-                div.onclick = () => {
-                    selectedFighterIdx = i;
-                    activeFighter = null;
-                    document.getElementById('upgrade-panel').style.display = 'none';
-                    document.querySelectorAll('.fighter-option').forEach(el => el.classList.remove('selected'));
-                    div.classList.add('selected');
-                };
-                div.innerHTML = `<div class="fighter-icon-box">${f.icon}</div><span class="cost-label">${f.cost}</span>`;
-                gridDiv.appendChild(div);
+        function init() {
+            const grid = document.getElementById('shop-grid');
+            FIGHTER_DATA.forEach((f, i) => {
+                const item = document.createElement('div');
+                item.className = 'shop-item';
+                item.id = `item-${i}`;
+                item.onclick = () => selectFromShop(i);
+                item.innerHTML = `<div class="item-icon" style="background:${f.color}">${f.icon}</div><span class="item-cost">${f.cost}</span>`;
+                grid.appendChild(item);
             });
-            updateUI();
+            updateStats();
+            requestAnimationFrame(gameLoop);
         }
 
-        function updateUI() {
+        function selectFromShop(i) {
+            selectedShopIdx = i;
+            activeSelection = null;
+            document.getElementById('upgrade-panel').style.display = 'none';
+            document.querySelectorAll('.shop-item').forEach(el => el.classList.remove('selected'));
+            document.getElementById(`item-${i}`).classList.add('selected');
+        }
+
+        function toggleGameSpeed() {
+            gameSpeed = gameSpeed === 1 ? 3 : 1;
+            document.getElementById('speed-btn').innerHTML = gameSpeed === 1 ? "▶️ x1" : "⏩ x3";
+        }
+
+        function updateStats() {
             document.getElementById('gold').innerText = Math.floor(gold);
             document.getElementById('lives').innerText = lives;
             document.getElementById('round').innerText = round;
         }
 
-        function toggleSpeed() {
-            gameSpeed = gameSpeed === 1 ? 2.5 : 1;
-            document.getElementById('speed-btn').innerText = gameSpeed === 1 ? "▶️ x1" : "⏩ x2.5";
-        }
+        // --- Logic Classes ---
 
-        // Classes
         class Enemy {
             constructor() {
-                this.x = pixelPath[0].x;
-                this.y = pixelPath[0].y;
+                this.x = pathPoints[0].x;
+                this.y = pathPoints[0].y;
                 this.targetIdx = 1;
-                this.maxHp = 25 + (round * 18);
+                this.maxHp = 25 + (round * 20);
                 this.hp = this.maxHp;
                 this.speed = 1.6 + (round * 0.05);
             }
             update() {
-                const target = pixelPath[this.targetIdx];
+                const target = pathPoints[this.targetIdx];
                 const dx = target.x - this.x;
                 const dy = target.y - this.y;
                 const dist = Math.sqrt(dx*dx + dy*dy);
@@ -299,11 +292,11 @@
 
                 if (dist < step) {
                     this.targetIdx++;
-                    if (this.targetIdx >= pixelPath.length) {
-                        lives -= 5;
-                        this.hp = -1;
-                        updateUI();
-                        if (lives <= 0) endGame();
+                    if (this.targetIdx >= pathPoints.length) {
+                        lives -= 10;
+                        this.hp = -100;
+                        updateStats();
+                        if (lives <= 0) doGameOver();
                     }
                 } else {
                     this.x += (dx/dist) * step;
@@ -311,64 +304,79 @@
                 }
             }
             draw() {
-                ctx.font = "24px Arial";
+                ctx.font = "28px Arial";
                 ctx.textAlign = "center";
-                ctx.fillText("📦", this.x, this.y + 8);
+                ctx.fillText("📦", this.x, this.y + 10);
+                // Health bar
                 ctx.fillStyle = "#c0392b";
-                ctx.fillRect(this.x - 15, this.y - 20, 30, 4);
+                ctx.fillRect(this.x - 18, this.y - 20, 36, 4);
                 ctx.fillStyle = "#2ecc71";
-                ctx.fillRect(this.x - 15, this.y - 20, 30 * (Math.max(0, this.hp)/this.maxHp), 4);
+                ctx.fillRect(this.x - 18, this.y - 20, 36 * (Math.max(0, this.hp/this.maxHp)), 4);
             }
         }
 
         class Fighter {
-            constructor(gx, gy, type) {
+            constructor(gx, gy, data) {
                 this.gx = gx; this.gy = gy;
                 this.x = gx * TILE_SIZE + TILE_SIZE/2;
                 this.y = gy * TILE_SIZE + TILE_SIZE/2;
-                this.type = {...type};
+                this.data = JSON.parse(JSON.stringify(data)); // Clone data
                 this.level = 1;
-                this.cooldown = 0;
+                this.timer = 0;
             }
             update() {
-                if (this.cooldown > 0) this.cooldown -= gameSpeed;
-                if (this.cooldown <= 0) {
-                    const target = enemies.find(e => Math.sqrt((e.x-this.x)**2 + (e.y-this.y)**2) < this.type.range);
+                if (this.timer > 0) this.timer -= gameSpeed;
+                if (this.timer <= 0) {
+                    const target = enemies.find(e => Math.sqrt((e.x-this.x)**2 + (e.y-this.y)**2) < this.data.range);
                     if (target) {
-                        projectiles.push(new Projectile(this.x, this.y, target, this.type.damage));
-                        this.cooldown = this.type.rate;
+                        projectiles.push(new Projectile(this.x, this.y, target, this.data.damage, this.data.color));
+                        this.timer = this.data.rate;
                     }
                 }
             }
             draw() {
+                // Drawing actual visible Fighter square
                 ctx.save();
-                ctx.globalAlpha = 0.6; // Seethrough Fighters
-                ctx.font = "32px Arial";
+                ctx.globalAlpha = 0.75; // Semi-transparent effect requested
+                ctx.fillStyle = this.data.color;
+                // Rounded square background
+                ctx.beginPath();
+                ctx.roundRect(this.x - 18, this.y - 18, 36, 36, 8);
+                ctx.fill();
+                ctx.strokeStyle = "rgba(255,255,255,0.5)";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Icon
+                ctx.font = "28px Arial";
                 ctx.textAlign = "center";
-                ctx.fillText(this.type.icon, this.x, this.y + 10);
-                if (activeFighter === this) {
+                ctx.textBaseline = "middle";
+                ctx.globalAlpha = 1.0; 
+                ctx.fillText(this.data.icon, this.x, this.y + 2);
+
+                // Range visualization
+                if (activeSelection === this) {
                     ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.type.range, 0, Math.PI*2);
-                    ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+                    ctx.arc(this.x, this.y, this.data.range, 0, Math.PI*2);
+                    ctx.strokeStyle = "rgba(255,255,255,0.2)";
+                    ctx.lineWidth = 1;
                     ctx.stroke();
                 }
                 ctx.restore();
-                ctx.fillStyle = "white";
-                ctx.font = "10px Arial";
-                ctx.fillText("Lv" + this.level, this.x, this.y + 22);
             }
         }
 
         class Projectile {
-            constructor(x, y, target, dmg) {
+            constructor(x, y, target, dmg, color) {
                 this.x = x; this.y = y; this.target = target;
-                this.dmg = dmg; this.dead = false;
+                this.dmg = dmg; this.color = color;
+                this.dead = false;
             }
             update() {
                 const dx = this.target.x - this.x;
                 const dy = this.target.y - this.y;
                 const dist = Math.sqrt(dx*dx + dy*dy);
-                const step = 10 * gameSpeed;
+                const step = 9 * gameSpeed;
 
                 if (dist < step) {
                     this.target.hp -= this.dmg;
@@ -379,136 +387,165 @@
                 }
             }
             draw() {
-                ctx.fillStyle = "#f1c40f";
-                ctx.beginPath(); ctx.arc(this.x, this.y, 4, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = this.color;
+                ctx.beginPath(); ctx.arc(this.x, this.y, 5, 0, Math.PI*2); ctx.fill();
             }
         }
 
-        // Logic
-        function upgradeFighter() {
-            if (!activeFighter) return;
-            const cost = activeFighter.level * 50;
-            if (gold >= cost) {
-                gold -= cost;
-                activeFighter.level++;
-                activeFighter.type.damage *= 1.4;
-                activeFighter.type.range *= 1.1;
-                activeFighter.type.rate *= 0.9;
-                showUpgradePanel(activeFighter);
-                updateUI();
-            }
-        }
-
-        function deselectFighter() {
-            activeFighter = null;
-            document.getElementById('upgrade-panel').style.display = 'none';
-        }
-
-        function showUpgradePanel(f) {
-            activeFighter = f;
-            selectedFighterIdx = -1;
-            document.querySelectorAll('.fighter-option').forEach(el => el.classList.remove('selected'));
-            const panel = document.getElementById('upgrade-panel');
-            panel.style.display = 'flex';
-            document.getElementById('upgrade-title').innerText = f.type.name;
-            document.getElementById('upgrade-stats').innerText = `Level: ${f.level} | Dmg: ${Math.round(f.type.damage)} | Range: ${Math.round(f.type.range)}`;
-            document.getElementById('up-cost').innerText = f.level * 50;
-        }
-
-        function startWave() {
-            if (waveActive) return;
-            waveActive = true;
-            let count = 8 + round * 4;
-            let spawned = 0;
-            const timer = setInterval(() => {
-                if (isGameOver) clearInterval(timer);
-                enemies.push(new Enemy());
-                spawned++;
-                if (spawned >= count) {
-                    clearInterval(timer);
-                    const checkEnd = setInterval(() => {
-                        if (enemies.length === 0) {
-                            clearInterval(checkEnd);
-                            waveActive = false;
-                            round++;
-                            gold += 60;
-                            updateUI();
-                        }
-                    }, 500);
-                }
-            }, 700 / gameSpeed);
-        }
+        // --- Interaction ---
 
         canvas.addEventListener('mousedown', (e) => {
             const rect = canvas.getBoundingClientRect();
             const gx = Math.floor((e.clientX - rect.left) / TILE_SIZE);
             const gy = Math.floor((e.clientY - rect.top) / TILE_SIZE);
 
-            // Clicked existing fighter?
+            // Check if clicking existing fighter
             const clickedF = fighters.find(f => f.gx === gx && f.gy === gy);
             if (clickedF) {
-                showUpgradePanel(clickedF);
+                openUpgrade(clickedF);
                 return;
             }
 
-            // Buying?
-            if (selectedFighterIdx !== -1) {
-                const type = FIGHTER_TYPES[selectedFighterIdx];
-                if (gold >= type.cost && !occupied[gy][gx]) {
-                    gold -= type.cost;
-                    fighters.push(new Fighter(gx, gy, type));
-                    occupied[gy][gx] = true;
-                    updateUI();
+            // Placement logic
+            if (selectedShopIdx !== -1) {
+                const data = FIGHTER_DATA[selectedShopIdx];
+                if (gold >= data.cost && !isPath(gx, gy) && !fighters.some(f=>f.gx===gx && f.gy===gy)) {
+                    gold -= data.cost;
+                    fighters.push(new Fighter(gx, gy, data));
+                    updateStats();
                 }
             }
         });
 
-        function drawMap() {
-            for(let y=0; y<GRID_H; y++) {
-                for(let x=0; x<GRID_W; x++) {
-                    ctx.fillStyle = (x + y) % 2 === 0 ? "#52c234" : "#45b62b";
-                    ctx.fillRect(x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                }
+        function isPath(gx, gy) {
+            // Simplified path check for the winding road
+            const px = gx * TILE_SIZE + TILE_SIZE/2;
+            const py = gy * TILE_SIZE + TILE_SIZE/2;
+            // Check distance to all path line segments
+            for(let i=0; i<pathPoints.length-1; i++) {
+                const p1 = pathPoints[i];
+                const p2 = pathPoints[i+1];
+                const d = distToSegment({x:px, y:py}, p1, p2);
+                if (d < TILE_SIZE * 0.6) return true;
             }
-            ctx.strokeStyle = "#8b4513";
-            ctx.lineWidth = TILE_SIZE;
-            ctx.lineCap = "square";
-            ctx.lineJoin = "round";
-            ctx.beginPath();
-            ctx.moveTo(pixelPath[0].x, pixelPath[0].y);
-            pixelPath.forEach(p => ctx.lineTo(p.x, p.y));
-            ctx.stroke();
+            return false;
         }
 
-        function endGame() {
+        function distToSegment(p, v, w) {
+            const l2 = (v.x-w.x)**2 + (v.y-w.y)**2;
+            if (l2 === 0) return Math.sqrt((p.x-v.x)**2 + (p.y-v.y)**2);
+            let t = ((p.x-v.x)*(w.x-v.x) + (p.y-v.y)*(w.y-v.y)) / l2;
+            t = Math.max(0, Math.min(1, t));
+            return Math.sqrt((p.x - (v.x + t*(w.x-v.x)))**2 + (p.y - (v.y + t*(w.y-v.y)))**2);
+        }
+
+        function openUpgrade(f) {
+            activeSelection = f;
+            selectedShopIdx = -1;
+            document.querySelectorAll('.shop-item').forEach(el => el.classList.remove('selected'));
+            
+            const panel = document.getElementById('upgrade-panel');
+            panel.style.display = 'flex';
+            document.getElementById('u-name').innerText = f.data.name;
+            document.getElementById('u-stats').innerHTML = `Level: ${f.level}<br>Dmg: ${Math.round(f.data.damage)} | Range: ${Math.round(f.data.range)}`;
+            document.getElementById('u-cost').innerText = f.level * 60;
+        }
+
+        function upgradeActiveFighter() {
+            if (!activeSelection) return;
+            const cost = activeSelection.level * 60;
+            if (gold >= cost) {
+                gold -= cost;
+                activeSelection.level++;
+                activeSelection.data.damage *= 1.4;
+                activeSelection.data.range += 10;
+                activeSelection.data.rate *= 0.92;
+                openUpgrade(activeSelection); // Refresh panel
+                updateStats();
+            }
+        }
+
+        function closeUpgrade() {
+            activeSelection = null;
+            document.getElementById('upgrade-panel').style.display = 'none';
+        }
+
+        // --- Game System ---
+
+        function startWave() {
+            if (activeWave) return;
+            activeWave = true;
+            spawning = true;
+            let count = 10 + round * 5;
+            let spawned = 0;
+            const timer = setInterval(() => {
+                if (isGameOver) { clearInterval(timer); return; }
+                enemies.push(new Enemy());
+                spawned++;
+                if (spawned >= count) {
+                    clearInterval(timer);
+                    spawning = false;
+                }
+            }, 800 / gameSpeed);
+        }
+
+        function doGameOver() {
             isGameOver = true;
             document.getElementById('game-over').style.display = 'flex';
             document.getElementById('final-round').innerText = round;
         }
 
-        function loop() {
+        function gameLoop() {
             if (isGameOver) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawMap();
+            ctx.clearRect(0,0, canvas.width, canvas.height);
+            
+            // Draw Grass
+            for(let y=0; y<GRID_H; y++) {
+                for(let x=0; x<GRID_W; x++) {
+                    ctx.fillStyle = (x+y)%2===0 ? "#2ecc71" : "#27ae60";
+                    ctx.fillRect(x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                }
+            }
 
+            // Draw Path
+            ctx.strokeStyle = "#8b4513";
+            ctx.lineWidth = TILE_SIZE * 0.9;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            ctx.beginPath();
+            ctx.moveTo(pathPoints[0].x, pathPoints[0].y);
+            pathPoints.forEach(p => ctx.lineTo(p.x, p.y));
+            ctx.stroke();
+
+            // Fighters
             fighters.forEach(f => { f.update(); f.draw(); });
+
+            // Enemies
             enemies = enemies.filter(e => e.hp > 0);
             enemies.forEach(e => {
                 e.update(); e.draw();
-                if (e.hp <= 0 && e.targetIdx < pixelPath.length) gold += 8;
+                if (e.hp <= 0 && e.hp > -90) { gold += 5; updateStats(); }
             });
+
+            // Projectiles
             projectiles = projectiles.filter(p => !p.dead && p.target.hp > 0);
             projectiles.forEach(p => { p.update(); p.draw(); });
 
-            if (!waveActive && enemies.length === 0) {
+            // Next Wave
+            if (!spawning && enemies.length === 0) {
+                if (activeWave) {
+                    activeWave = false; 
+                    round++; 
+                    gold += 50; 
+                    updateStats();
+                }
                 startWave();
             }
 
-            requestAnimationFrame(loop);
+            requestAnimationFrame(gameLoop);
         }
 
-        initGrid();
-        loop();
+        init();
     </script>
 </body>
 </html>
