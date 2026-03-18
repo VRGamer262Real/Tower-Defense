@@ -4,4 +4,4 @@ A **fire** and **silly** tower defense game that is kinda **bad** so don't be a 
 
 *sry if the code is legit spaghetti, like I can't even read it...*
 
-***THIS IS NOT BLOOKET PLEASE DON"T SUE ME!!***
+***THIS IS NOT BLOOKET PLEASE DON'T SUE ME!!***
