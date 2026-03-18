@@ -3,159 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fighter Defense</title>
+    <title>Fighter Defense - Blooket Edition</title>
     <style>
         :root {
-            --purple-ui: #9b59b6;
-            --wood-dark: #7d4d2d;
+            --purple-ui: #a44cd3;
+            --dark-purple: #8639b1;
+            --wood-dark: #8b4513;
             --wood-light: #a0522d;
             --stat-font: 'Arial Black', Gadget, sans-serif;
         }
 
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
             background: #111;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            font-family: var(--stat-font);
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden; font-family: var(--stat-font);
         }
 
-        /* Scalable Container to maintain 16:9 aspect ratio */
+        /* Scalable 1920x1080 Container */
         #game-scaler {
             width: 1920px;
             height: 1080px;
             background: #2c3e50;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 100px rgba(0,0,0,0.8);
             position: relative;
             transform-origin: center;
+            box-shadow: 0 0 100px rgba(0,0,0,0.8);
         }
 
-        /* Top Header */
+        /* Top bar matching screenshot */
         #header {
-            height: 80px;
+            height: 65px;
             background: var(--purple-ui);
-            border-bottom: 8px solid #8e44ad;
+            border-bottom: 6px solid var(--dark-purple);
             display: flex;
             justify-content: flex-end;
             align-items: center;
-            padding: 0 60px;
-            gap: 60px;
+            padding: 0 50px;
+            gap: 20px;
             z-index: 10;
         }
 
-        .stat { display: flex; align-items: center; gap: 15px; font-size: 40px; color: white; text-shadow: 3px 3px 0 rgba(0,0,0,0.3); }
+        .stat { display: flex; align-items: center; gap: 10px; font-size: 38px; color: white; }
 
-        /* Main Area */
         #main { display: flex; flex: 1; overflow: hidden; }
 
-        #viewport { position: relative; flex: 1; background: #3498db; }
+        #viewport { position: relative; flex: 1; background: #3498db; cursor: crosshair; }
         canvas { display: block; }
 
-        /* Sidebar */
+        /* Wood Sidebar */
         #sidebar {
-            width: 380px;
+            width: 350px;
             background: var(--wood-dark);
             border-left: 10px solid #5d361b;
             padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
             box-shadow: inset 15px 0 30px rgba(0,0,0,0.4);
         }
 
-        .hp-container {
-            width: 100%;
-            height: 50px;
-            background: #333;
-            border-radius: 12px;
-            border: 4px solid #5d361b;
-            position: relative;
-            overflow: hidden;
+        .hud-row { display: flex; align-items: center; justify-content: space-between; }
+        
+        #life-bar {
+            width: 180px; height: 35px; background: #333;
+            border-radius: 10px; border: 4px solid #5d361b;
+            position: relative; overflow: hidden;
         }
-        #hp-fill { width: 100%; height: 100%; background: #e74c3c; transition: width 0.3s; }
-        .hp-text { position: absolute; width:100%; text-align:center; top:8px; font-size:24px; color:white; }
+        #life-fill { width: 100%; height: 100%; background: #3498db; transition: width 0.3s; }
 
-        #round-card {
-            background: rgba(0,0,0,0.4);
-            border-radius: 15px;
-            padding: 15px;
-            text-align: center;
-            font-size: 36px;
-            color: white;
-            border: 4px solid #5d361b;
+        .round-card {
+            background: rgba(0,0,0,0.3); border: 5px solid #5d361b;
+            border-radius: 15px; padding: 10px; text-align: center;
+            font-size: 45px; color: white; margin: 10px 0;
         }
 
-        #shop-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            background: rgba(0,0,0,0.2);
-            padding: 15px;
-            border-radius: 15px;
-            overflow-y: auto;
-            max-height: 550px;
+        #shop-scroll {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 8px; background: rgba(0,0,0,0.2);
+            padding: 10px; border-radius: 12px;
+            overflow-y: auto; max-height: 520px;
         }
 
-        .item {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 8px;
-            text-align: center;
-            cursor: pointer;
-            border: 4px solid transparent;
-            transition: 0.1s;
+        .item-card {
+            background: rgba(255, 255, 255, 0.1); border-radius: 10px;
+            padding: 5px; text-align: center; cursor: pointer;
+            border: 4px solid transparent; transition: 0.1s;
         }
-        .item:hover { transform: scale(1.05); background: rgba(255, 255, 255, 0.2); }
-        .item.selected { border-color: #f1c40f; background: rgba(241, 196, 15, 0.3); }
+        .item-card:hover { background: rgba(255, 255, 255, 0.15); }
+        .item-card.selected { border-color: #f1c40f; background: rgba(241, 196, 15, 0.2); }
 
-        .f-icon {
-            width: 70px; height: 70px;
-            background: #fff;
-            margin: 0 auto 5px;
-            border-radius: 12px;
+        .f-box {
+            width: 65px; height: 65px; background: #fff;
+            margin: 0 auto 5px; border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 45px;
-            box-shadow: 0 5px 0 rgba(0,0,0,0.3);
+            font-size: 42px; box-shadow: 0 4px 0 rgba(0,0,0,0.3);
         }
-        .f-cost { background: #3498db; font-size: 18px; border-radius: 8px; color: white; display: block; }
+        .f-cost { background: #3498db; color: white; display: block; border-radius: 6px; font-size: 16px; }
 
-        #speed-btn {
-            background: #3498db;
-            border: none;
-            border-bottom: 10px solid #2980b9;
-            color: white;
-            padding: 20px;
-            font-size: 40px;
-            border-radius: 20px;
-            cursor: pointer;
-            margin-top: auto;
-            font-family: var(--stat-font);
+        /* Panels */
+        .action-btn {
+            background: #3498db; border: none; border-bottom: 8px solid #2980b9;
+            color: white; padding: 15px; font-size: 32px; border-radius: 15px;
+            cursor: pointer; font-family: var(--stat-font);
         }
-        #speed-btn:active { transform: translateY(5px); border-bottom-width: 5px; }
+        .action-btn:active { transform: translateY(4px); border-bottom-width: 4px; }
 
-        #upgrade-ui {
-            background: rgba(0,0,0,0.7);
-            border-radius: 20px;
-            padding: 20px;
-            display: none;
-            flex-direction: column;
-            gap: 15px;
-            border: 3px solid white;
+        #upgrade-panel {
+            background: rgba(0,0,0,0.6); border-radius: 20px;
+            padding: 15px; display: none; flex-direction: column;
+            gap: 10px; border: 3px solid white;
         }
 
-        #lose-screen {
-            position: absolute; inset: 0;
-            background: rgba(0,0,0,0.9);
-            display: none; flex-direction: column;
-            justify-content: center; align-items: center;
-            z-index: 100;
+        #speed-btn { margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 10px;}
+
+        #game-over {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.9);
+            display: none; flex-direction: column; justify-content: center;
+            align-items: center; z-index: 100;
         }
     </style>
 </head>
@@ -169,29 +136,36 @@
         <div id="main">
             <div id="viewport">
                 <canvas id="gameCanvas"></canvas>
-                <div id="lose-screen">
-                    <h1 style="font-size: 120px; color:#e74c3c; margin:0">DEFEATED</h1>
-                    <p style="font-size: 40px; color:white">Reached Round <span id="final-round">1</span></p>
-                    <button id="speed-btn" style="width:300px" onclick="location.reload()">TRY AGAIN</button>
+                <div id="game-over">
+                    <h1 style="font-size: 100px; color:#e74c3c">DEFEATED</h1>
+                    <p style="font-size: 40px; color:white">Defended until Round <span id="final-r">1</span></p>
+                    <button class="action-btn" style="width: 300px" onclick="location.reload()">PLAY AGAIN</button>
                 </div>
             </div>
 
             <div id="sidebar">
-                <div class="hp-container">
-                    <div id="hp-fill"></div>
-                    <div class="hp-text"><span id="hp-ui">100</span> ❤️</div>
-                </div>
-                <div id="round-card">Round <span id="round-ui">1</span></div>
-                <div id="shop-grid"></div>
-
-                <div id="upgrade-ui">
-                    <div id="up-name" style="color:#f1c40f; font-size:28px">Fighter</div>
-                    <div id="up-stats" style="color:#ccc; font-size:18px">Lv 1 | Dmg: 10</div>
-                    <button id="speed-btn" style="font-size:24px; padding:15px" onclick="upgradeFighter()">UPGRADE (<span id="up-cost">50</span>)</button>
-                    <button id="speed-btn" style="background:#e74c3c; border-bottom-color:#c0392b; font-size:18px; padding:8px" onclick="deselect()">CLOSE</button>
+                <div class="hud-row">
+                    <div id="life-bar"><div id="life-fill"></div></div>
+                    <div style="color:white; font-size: 24px;">100 ❤️</div>
                 </div>
 
-                <button id="speed-btn" onclick="toggleSpeed()">▶️ x1</button>
+                <div class="round-card">Round <span id="round-ui">1</span></div>
+
+                <div id="shop-scroll"></div>
+
+                <div id="upgrade-panel">
+                    <div id="u-name" style="color:#f1c40f; font-size: 24px;">Fighter</div>
+                    <div id="u-stats" style="color:#ccc; font-size: 14px;">Level 1</div>
+                    <button class="action-btn" style="font-size: 20px; padding: 10px" onclick="upgradeF()">UPGRADE (<span id="u-cost">50</span>)</button>
+                    <div style="display: flex; gap: 5px;">
+                        <button class="action-btn" style="flex:1; font-size:16px; padding:8px; background:#e67e22; border-color:#d35400" onclick="sellF()">SELL (<span id="s-val">0</span>)</button>
+                        <button class="action-btn" style="flex:1; font-size:16px; padding:8px; background:#e74c3c; border-color:#c0392b" onclick="cancelSel()">CLOSE</button>
+                    </div>
+                </div>
+
+                <button id="speed-btn" class="action-btn" onclick="toggleSpd()">
+                    <span id="s-icon">▶️</span> <span id="s-txt">x1</span>
+                </button>
             </div>
         </div>
     </div>
@@ -201,338 +175,240 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        let gold = 400;
-        let hp = 100;
-        let round = 1;
-        let speed = 1;
-        let gameOver = false;
-        let waveActive = false;
-        let shopIdx = -1;
-        let selectedFighter = null;
+        let gold = 400; let lives = 100; let round = 1; let speed = 1;
+        let isOver = false; let waveRunning = false;
+        let shopSel = -1; let activeF = null;
 
-        let fighters = [];
-        let enemies = [];
-        let projectiles = [];
-
-        const TILE = 60;
-        const GW = 26; // Approx grid for 1920 viewport
-        const GH = 17;
-
-        const FIGHTERS = [
-            { name: "Chick", icon: "🐥", cost: 30, range: 140, dmg: 10, rate: 45, col: "#f1c40f" },
-            { name: "Monkey", icon: "🐒", cost: 50, range: 170, dmg: 20, rate: 50, col: "#9b59b6" },
-            { name: "Dragon", icon: "🐉", cost: 200, range: 350, dmg: 120, rate: 110, col: "#e74c3c" },
-            { name: "Owl", icon: "🦉", cost: 70, range: 200, dmg: 18, rate: 25, col: "#34495e" },
-            { name: "Frog", icon: "🐸", cost: 40, range: 150, dmg: 12, rate: 35, col: "#2ecc71" },
-            { name: "Pig", icon: "🐷", cost: 45, range: 130, dmg: 30, rate: 70, col: "#ff9ff3" },
-            { name: "Wolf", icon: "🐺", cost: 90, range: 190, dmg: 50, rate: 60, col: "#bdc3c7" },
-            { name: "Alien", icon: "👽", cost: 120, range: 250, dmg: 15, rate: 10, col: "#1dd1a1" },
-            { name: "Cat", icon: "🐱", cost: 30, range: 120, dmg: 8, rate: 30, col: "#f39c12" }
-        ];
-
+        let fighters = []; let enemies = []; let projectiles = [];
+        const TILE = 65; const GW = 24; const GHArr = 16;
         let waypoints = [];
 
-        function generateRandomPath() {
-            waypoints = [];
-            let cx = 4;
-            let cy = 0;
-            waypoints.push({x: cx * TILE + TILE/2, y: -50}); // Pre-start
-            waypoints.push({x: cx * TILE + TILE/2, y: cy * TILE + TILE/2});
+        const DATA = [
+            { name: "Chick", icon: "🐥", cost: 30, range: 150, dmg: 10, rate: 45, col: "#f1c40f" },
+            { name: "Monkey", icon: "🐒", cost: 50, range: 180, dmg: 20, rate: 50, col: "#9b59b6" },
+            { name: "Dragon", icon: "🐉", cost: 200, range: 380, dmg: 130, rate: 110, col: "#e74c3c" },
+            { name: "Owl", icon: "🦉", cost: 60, range: 210, dmg: 15, rate: 25, col: "#34495e" },
+            { name: "Pig", icon: "🐷", cost: 40, range: 140, dmg: 28, rate: 65, col: "#ff9ff3" },
+            { name: "Alien", icon: "👽", cost: 110, range: 250, dmg: 12, rate: 12, col: "#1dd1a1" }
+        ];
 
-            while (cx < GW && cy < GH) {
-                // Determine next move
-                let move = Math.random() > 0.5 ? 'x' : 'y';
-                if (move === 'x' && cx < GW - 2) {
-                    cx += Math.floor(Math.random() * 4) + 3;
-                } else if (cy < GH - 2) {
-                    cy += Math.floor(Math.random() * 3) + 2;
-                }
-                
-                cx = Math.min(cx, GW - 1);
-                cy = Math.min(cy, GH - 2);
-                waypoints.push({x: cx * TILE + TILE/2, y: cy * TILE + TILE/2});
-                
-                if (cx >= GW - 2 || cy >= GH - 3) break;
+        function createPath() {
+            waypoints = [];
+            let cx = 4, cy = 0;
+            waypoints.push({x: cx*TILE + TILE/2, y: -TILE});
+            waypoints.push({x: cx*TILE + TILE/2, y: cy*TILE + TILE/2});
+            while (cx < 22 && cy < 13) {
+                if (Math.random() > 0.5 && cx < 20) cx += Math.floor(Math.random()*4)+2;
+                else cy += Math.floor(Math.random()*3)+2;
+                waypoints.push({x: cx*TILE + TILE/2, y: cy*TILE + TILE/2});
             }
-            waypoints.push({x: (GW + 2) * TILE, y: cy * TILE + TILE/2}); // End
+            waypoints.push({x: (GW+2)*TILE, y: cy*TILE + TILE/2});
         }
 
-        function handleResize() {
-            const ww = window.innerWidth;
-            const wh = window.innerHeight;
-            const scale = Math.min(ww / 1920, wh / 1080);
+        function resize() {
+            const scale = Math.min(window.innerWidth/1920, window.innerHeight/1080);
             scaler.style.transform = `scale(${scale})`;
-            
-            // Adjust canvas to its container size in the 1920 space
-            canvas.width = 1920 - 380;
-            canvas.height = 1000;
+            canvas.width = 1920 - 350;
+            canvas.height = 1080 - 65;
         }
 
         function init() {
-            const grid = document.getElementById('shop-grid');
-            FIGHTERS.forEach((f, i) => {
-                const div = document.createElement('div');
-                div.className = 'item';
-                div.id = `i-${i}`;
-                div.onclick = () => {
-                    shopIdx = i;
-                    selectedFighter = null;
-                    document.getElementById('upgrade-ui').style.display = 'none';
-                    document.querySelectorAll('.item').forEach(el => el.classList.remove('selected'));
-                    div.classList.add('selected');
+            const grid = document.getElementById('shop-scroll');
+            DATA.forEach((f, i) => {
+                const d = document.createElement('div');
+                d.className = 'item-card'; d.id = `i-${i}`;
+                d.onclick = () => {
+                    shopSel = i; activeF = null;
+                    document.getElementById('upgrade-panel').style.display = 'none';
+                    document.querySelectorAll('.item-card').forEach(c => c.classList.remove('selected'));
+                    d.classList.add('selected');
                 };
-                div.innerHTML = `<div class="f-icon" style="background:${f.col}">${f.icon}</div><span class="f-cost">${f.cost}</span>`;
-                grid.appendChild(div);
+                d.innerHTML = `<div class="f-box" style="background:${f.col}">${f.icon}</div><span class="f-cost">${f.cost}</span>`;
+                grid.appendChild(d);
             });
-            
-            generateRandomPath();
-            window.addEventListener('resize', handleResize);
-            handleResize();
-            loop();
+            createPath(); window.addEventListener('resize', resize); resize(); loop();
         }
 
-        function toggleSpeed() {
+        function toggleSpd() {
             speed = speed === 1 ? 3 : 1;
-            document.getElementById('speed-btn').innerText = speed === 1 ? "▶️ x1" : "⏩ x3";
+            document.getElementById('s-icon').innerText = speed === 1 ? '▶️' : '⏩';
+            document.getElementById('s-txt').innerText = 'x' + speed;
         }
 
-        function updateUI() {
-            document.getElementById('gold-ui').innerText = Math.floor(gold);
-            document.getElementById('hp-ui').innerText = Math.max(0, hp);
-            document.getElementById('round-ui').innerText = round;
-            document.getElementById('hp-fill').style.width = hp + "%";
-        }
-
-        // Classes
         class Enemy {
             constructor() {
-                this.x = waypoints[0].x;
-                this.y = waypoints[0].y;
-                this.target = 1;
-                this.maxHp = 40 + (round * 45);
-                this.hp = this.maxHp;
-                this.speed = 1.8 + (round * 0.04);
+                this.x = waypoints[0].x; this.y = waypoints[0].y;
+                this.target = 1; this.maxHp = 50 + (round * 50);
+                this.hp = this.maxHp; this.spd = 1.9 + (round * 0.05);
             }
             update() {
-                const goal = waypoints[this.target];
-                const dx = goal.x - this.x;
-                const dy = goal.y - this.y;
-                const d = Math.hypot(dx, dy);
-                const step = this.speed * speed;
-
+                const g = waypoints[this.target];
+                const dx = g.x - this.x, dy = g.y - this.y;
+                const d = Math.hypot(dx, dy); const step = this.spd * speed;
                 if (d < step) {
                     this.target++;
                     if (this.target >= waypoints.length) {
-                        hp -= 5;
-                        this.hp = -99999;
-                        updateUI();
-                        if (hp <= 0) doLose();
+                        lives -= 5; this.hp = -100000;
+                        updateStats(); if (lives <=0) gameOver();
                     }
-                } else {
-                    this.x += (dx/d) * step;
-                    this.y += (dy/d) * step;
-                }
+                } else { this.x += (dx/d)*step; this.y += (dy/d)*step; }
             }
             draw() {
-                ctx.font = "40px Arial";
-                ctx.textAlign = "center"; ctx.textBaseline = "middle";
-                ctx.fillText("📦", this.x, this.y + 10);
-                
-                ctx.fillStyle = "rgba(0,0,0,0.5)";
-                ctx.fillRect(this.x - 25, this.y - 35, 50, 7);
-                ctx.fillStyle = "#2ecc71";
-                ctx.fillRect(this.x - 25, this.y - 35, 50 * (Math.max(0, this.hp/this.maxHp)), 7);
+                ctx.font = "42px Arial"; ctx.textAlign = "center";
+                ctx.fillText("📦", this.x, this.y + 12);
+                ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.fillRect(this.x-25, this.y-35, 50, 7);
+                ctx.fillStyle = "#2ecc71"; ctx.fillRect(this.x-25, this.y-35, 50 * (Math.max(0, this.hp/this.maxHp)), 7);
             }
         }
 
         class Fighter {
-            constructor(gx, gy, data) {
+            constructor(gx, gy, d) {
                 this.gx = gx; this.gy = gy;
-                this.x = gx * TILE + TILE/2;
-                this.y = gy * TILE + TILE/2;
-                this.data = JSON.parse(JSON.stringify(data));
-                this.lvl = 1;
-                this.cd = 0;
+                this.x = gx*TILE + TILE/2; this.y = gy*TILE + TILE/2;
+                this.data = JSON.parse(JSON.stringify(d)); this.lvl = 1; this.cd = 0;
+                this.totalSpent = d.cost;
             }
             update() {
                 if (this.cd > 0) this.cd -= speed;
                 if (this.cd <= 0) {
-                    const target = enemies.find(e => Math.hypot(e.x - this.x, e.y - this.y) < this.data.range);
-                    if (target) {
-                        projectiles.push(new Projectile(this.x, this.y, target, this.data.dmg, this.data.col));
+                    const t = enemies.find(e => Math.hypot(e.x - this.x, e.y - this.y) < this.data.range);
+                    if (t) {
+                        projectiles.push(new Projectile(this.x, this.y, t, this.data.dmg, this.data.col));
                         this.cd = this.data.rate;
                     }
                 }
             }
             draw() {
-                ctx.save();
-                ctx.globalAlpha = 0.65;
-                ctx.fillStyle = this.data.col;
-                ctx.beginPath(); ctx.roundRect(this.x - 25, this.y - 25, 50, 50, 10); ctx.fill();
-                ctx.globalAlpha = 1.0;
-                ctx.font = "42px Arial";
-                ctx.textAlign = "center"; ctx.textBaseline = "center";
-                ctx.fillText(this.data.icon, this.x, this.y + 5);
-                if (selectedFighter === this) {
+                ctx.save(); ctx.globalAlpha = 0.6; ctx.fillStyle = this.data.col;
+                ctx.beginPath(); ctx.roundRect(this.x-28, this.y-28, 56, 56, 12); ctx.fill();
+                ctx.globalAlpha = 1.0; ctx.font = "44px Arial"; ctx.textAlign = "center";
+                ctx.textBaseline = "middle"; ctx.fillText(this.data.icon, this.x, this.y + 3);
+                if (activeF === this) {
                     ctx.beginPath(); ctx.arc(this.x, this.y, this.data.range, 0, Math.PI*2);
-                    ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.stroke();
+                    ctx.strokeStyle = "rgba(255,255,255,0.2)"; ctx.stroke();
                 }
                 ctx.restore();
             }
         }
 
         class Projectile {
-            constructor(x, y, target, dmg, col) {
-                this.x = x; this.y = y; this.target = target;
-                this.dmg = dmg; this.col = col; this.dead = false;
-            }
+            constructor(x,y,t,dmg,col) { this.x=x;this.y=y;this.t=t;this.dmg=dmg;this.col=col;this.dead=false;}
             update() {
-                const dx = this.target.x - this.x;
-                const dy = this.target.y - this.y;
-                const d = Math.hypot(dx, dy);
-                const step = 15 * speed;
-                if (d < step) {
-                    this.target.hp -= this.dmg;
-                    // Coin per health logic: Gold = Damage dealt
-                    gold += this.dmg; 
-                    updateUI();
-                    this.dead = true;
-                } else {
-                    this.x += (dx/d) * step;
-                    this.y += (dy/d) * step;
-                }
+                const dx=this.t.x-this.x, dy=this.t.y-this.y, d=Math.hypot(dx,dy), step=16*speed;
+                if (d<step) {
+                    this.t.hp -= this.dmg; gold += this.dmg; // 1 coin per health logic
+                    updateStats(); this.dead=true;
+                } else { this.x+=(dx/d)*step; this.y+=(dy/d)*step; }
             }
-            draw() {
-                ctx.fillStyle = this.col;
-                ctx.beginPath(); ctx.arc(this.x, this.y, 8, 0, Math.PI*2); ctx.fill();
-            }
+            draw() { ctx.fillStyle=this.col; ctx.beginPath(); ctx.arc(this.x,this.y,8,0,Math.PI*2); ctx.fill(); }
         }
 
-        // Logic
         canvas.addEventListener('mousedown', (e) => {
-            if (gameOver) return;
+            if (isOver) return;
             const b = canvas.getBoundingClientRect();
-            // Important: we must account for the CSS scaling
-            const scale = 1920 / b.width;
-            const mx = (e.clientX - b.left) * scale;
-            const my = (e.clientY - b.top) * scale;
+            // Scale fix: relative to the 1920 space
+            const s = 1920 / (b.width + 350 * (b.width/1570)); // This adjusts for sidebar
+            const rect = scaler.getBoundingClientRect();
+            const mouseScale = 1920 / rect.width;
+            const mx = (e.clientX - rect.left) * mouseScale;
+            const my = (e.clientY - rect.top - 65 * (rect.height/1080)) * mouseScale;
             
-            const gx = Math.floor(mx / TILE);
-            const gy = Math.floor(my / TILE);
+            const gx = Math.floor(mx/TILE), gy = Math.floor(my/TILE);
+            const ex = fighters.find(f => f.gx === gx && f.gy === gy);
+            if (ex) { showUP(ex); return; }
 
-            const existing = fighters.find(f => f.gx === gx && f.gy === gy);
-            if (existing) {
-                showUpgrade(existing);
-                return;
-            }
-
-            if (shopIdx !== -1) {
-                const d = FIGHTERS[shopIdx];
-                if (gold >= d.cost && !isPath(gx, gy) && gx > 2) {
-                    gold -= d.cost;
-                    fighters.push(new Fighter(gx, gy, d));
-                    updateUI();
+            if (shopSel !== -1) {
+                const d = DATA[shopSel];
+                if (gold >= d.cost && !isP(gx, gy) && gx > 2) {
+                    gold -= d.cost; fighters.push(new Fighter(gx, gy, d)); updateStats();
                 }
             }
         });
 
-        function isPath(gx, gy) {
-            const px = gx * TILE + TILE/2;
-            const py = gy * TILE + TILE/2;
-            for(let i=0; i < waypoints.length-1; i++) {
-                const v = waypoints[i], w = waypoints[i+1];
-                const l2 = (v.x-w.x)**2 + (v.y-w.y)**2;
-                let t = ((px-v.x)*(w.x-v.x) + (py-v.y)*(w.y-v.y)) / l2;
-                t = Math.max(0, Math.min(1, t));
-                const d = Math.hypot(px - (v.x + t*(w.x-v.x)), py - (v.y + t*(w.y-v.y)));
-                if (d < TILE * 0.8) return true;
+        function isP(gx, gy) {
+            const px = gx*TILE+TILE/2, py = gy*TILE+TILE/2;
+            for(let i=0; i<waypoints.length-1; i++) {
+                const v=waypoints[i], w=waypoints[i+1], l2=(v.x-w.x)**2+(v.y-w.y)**2;
+                let t=Math.max(0, Math.min(1, ((px-v.x)*(w.x-v.x)+(py-v.y)*(w.y-v.y))/l2));
+                if (Math.hypot(px-(v.x+t*(w.x-v.x)), py-(v.y+t*(w.y-v.y))) < TILE*0.8) return true;
             }
             return false;
         }
 
-        function showUpgrade(f) {
-            selectedFighter = f;
-            shopIdx = -1;
-            document.querySelectorAll('.item').forEach(el => el.classList.remove('selected'));
-            document.getElementById('upgrade-ui').style.display = 'flex';
-            document.getElementById('up-name').innerText = f.data.name;
-            document.getElementById('up-stats').innerText = `Lv ${f.lvl} | Total Dmg Dealt: ${Math.round(f.data.dmg)}`;
-            document.getElementById('up-cost').innerText = f.lvl * 100;
+        function showUP(f) {
+            activeF = f; shopSel = -1;
+            document.querySelectorAll('.item-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById('upgrade-panel').style.display = 'flex';
+            document.getElementById('u-name').innerText = f.data.name;
+            document.getElementById('u-stats').innerText = `Lv ${f.lvl} | Power: ${Math.round(f.data.dmg)}`;
+            document.getElementById('u-cost').innerText = f.lvl * 80;
+            document.getElementById('s-val').innerText = Math.floor(f.totalSpent * 0.7);
         }
 
-        function upgradeFighter() {
-            if (!selectedFighter) return;
-            const cost = selectedFighter.lvl * 100;
-            if (gold >= cost) {
-                gold -= cost;
-                selectedFighter.lvl++;
-                selectedFighter.data.dmg *= 1.6;
-                selectedFighter.data.range += 20;
-                selectedFighter.data.rate *= 0.9;
-                showUpgrade(selectedFighter);
-                updateUI();
+        function upgradeF() {
+            if (!activeF) return; const c = activeF.lvl * 80;
+            if (gold >= c) {
+                gold-=c; activeF.totalSpent+=c; activeF.lvl++;
+                activeF.data.dmg *= 1.5; activeF.data.range += 20; activeF.data.rate *= 0.92;
+                showUP(activeF); updateStats();
             }
         }
 
-        function deselect() {
-            selectedFighter = null;
-            document.getElementById('upgrade-ui').style.display = 'none';
+        function sellF() {
+            if (!activeF) return;
+            gold += Math.floor(activeF.totalSpent * 0.7);
+            fighters = fighters.filter(f => f !== activeF);
+            cancelSel(); updateStats();
         }
 
-        function doLose() {
-            gameOver = true;
-            document.getElementById('lose-screen').style.display = 'flex';
-            document.getElementById('final-round').innerText = round;
+        function cancelSel() { activeF = null; document.getElementById('upgrade-panel').style.display='none'; }
+        
+        function updateStats() {
+            document.getElementById('gold-ui').innerText = Math.floor(gold);
+            document.getElementById('round-ui').innerText = round;
+            document.getElementById('life-fill').style.width = Math.max(0, lives) + "%";
         }
+
+        function gameOver() { isOver=true; document.getElementById('game-over').style.display='flex'; document.getElementById('final-r').innerText=round; }
 
         function loop() {
-            if (gameOver) return;
-            ctx.clearRect(0,0, canvas.width, canvas.height);
-            
-            // Draw Tiles
+            if (isOver) return; ctx.clearRect(0,0, canvas.width, canvas.height);
+            // Grass Tiling
             ctx.fillStyle = "#3498db"; ctx.fillRect(0,0, canvas.width, canvas.height);
-            ctx.fillStyle = "#8b4513"; ctx.fillRect(TILE*2, 0, TILE, canvas.height); // Cliff
-            
-            for(let y=0; y<GH; y++) {
-                for(let x=3; x<GW; x++) {
-                    ctx.fillStyle = (x+y)%2 === 0 ? "#2ecc71" : "#27ae60";
-                    ctx.fillRect(x*TILE, y*TILE, TILE, TILE);
-                }
+            ctx.fillStyle = "#8b4513"; ctx.fillRect(TILE*2.1, 0, TILE*0.8, canvas.height);
+            for(let y=0; y<16; y++) for(let x=3; x<GW; x++) {
+                ctx.fillStyle = (x+y)%2===0 ? "#2ecc71" : "#27ae60";
+                ctx.fillRect(x*TILE, y*TILE, TILE, TILE);
             }
-
-            // Draw Path
+            // Path
             ctx.strokeStyle = "#8b4513"; ctx.lineWidth = TILE; ctx.lineCap = "round"; ctx.lineJoin = "round";
             ctx.beginPath(); ctx.moveTo(waypoints[0].x, waypoints[0].y);
             waypoints.forEach(p => ctx.lineTo(p.x, p.y)); ctx.stroke();
-            ctx.strokeStyle = "#a0522d"; ctx.lineWidth = TILE * 0.8; ctx.stroke();
+            ctx.strokeStyle = "#a0522d"; ctx.lineWidth = TILE*0.8; ctx.stroke();
 
             fighters.forEach(f => { f.update(); f.draw(); });
-            enemies = enemies.filter(e => e.hp > 0);
-            enemies.forEach(e => { e.update(); e.draw(); });
-            projectiles = projectiles.filter(p => !p.dead && p.target.hp > 0);
+            enemies = enemies.filter(e => e.hp > 0); enemies.forEach(e => e.update());
+            enemies.forEach(e => e.draw());
+            projectiles = projectiles.filter(p => !p.dead && p.t.hp > 0);
             projectiles.forEach(p => { p.update(); p.draw(); });
 
-            if (!waveActive && enemies.length === 0) {
-                waveActive = true;
-                let c = 0, count = 10 + round * 5;
+            if (!waveRunning && enemies.length === 0) {
+                waveRunning = true; let c=0, n=8 + round*6;
                 let t = setInterval(() => {
-                    if (gameOver) { clearInterval(t); return; }
+                    if (isOver) { clearInterval(t); return; }
                     enemies.push(new Enemy());
-                    if (++c >= count) {
+                    if (++c >= n) {
                         clearInterval(t);
-                        let check = setInterval(() => {
+                        let ck = setInterval(() => {
                             if (enemies.length === 0) {
-                                clearInterval(check); waveActive = false; round++; 
-                                gold += 200; updateUI();
+                                clearInterval(ck); waveRunning = false; round++; gold += 150; updateStats();
                             }
                         }, 500);
                     }
-                }, 700 / speed);
+                }, 750 / speed);
             }
-
             requestAnimationFrame(loop);
         }
-
         init();
     </script>
 </body>
