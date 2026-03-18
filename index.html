@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fighter Defense - Blooket Pro</title>
+    <title>Blooket Fighter Defense - Pro</title>
     <style>
         :root {
             --purple-ui: #a44cd3;
             --dark-purple: #8639b1;
             --sidebar-wood: #7d4d2d;
-            --stat-font: 'Arial Black', Gadget, sans-serif;
+            --sidebar-inner: #5d361b;
+            --ui-font: 'Arial Black', Gadget, sans-serif;
         }
 
         body, html {
@@ -17,11 +18,11 @@
             width: 100%; height: 100%;
             background: #111;
             display: flex; justify-content: center; align-items: center;
-            overflow: hidden; font-family: var(--stat-font);
+            overflow: hidden; font-family: var(--ui-font);
         }
 
         /* 16:9 Scalable Container */
-        #container {
+        #game-scaler {
             width: 1920px;
             height: 1080px;
             background: #2c3e50;
@@ -29,33 +30,34 @@
             flex-direction: column;
             position: relative;
             transform-origin: center;
+            box-shadow: 0 0 100px rgba(0,0,0,0.9);
         }
 
-        /* Top Header */
+        /* Header matching Blooket style */
         #header {
-            height: 70px;
+            height: 75px;
             background: var(--purple-ui);
-            border-bottom: 7px solid var(--dark-purple);
+            border-bottom: 8px solid var(--dark-purple);
             display: flex;
             justify-content: flex-end;
             align-items: center;
-            padding: 0 40px;
+            padding: 0 50px;
             z-index: 100;
         }
 
-        .gold-display { font-size: 45px; color: white; display: flex; align-items: center; gap: 10px; }
+        .gold-box { font-size: 48px; color: white; display: flex; align-items: center; gap: 15px; }
 
-        /* Main Game Layout */
-        #game-layout { display: flex; flex: 1; overflow: hidden; position: relative; }
+        /* Main Game Area */
+        #main-container { display: flex; flex: 1; overflow: hidden; }
 
-        #view-area { position: relative; flex: 1; background: #3498db; }
-        canvas { display: block; image-rendering: auto; }
+        #canvas-holder { position: relative; flex: 1; background: #3498db; }
+        canvas { display: block; }
 
-        /* Wood Sidebar - Matching Screenshot */
+        /* Wooden Sidebar */
         #sidebar {
-            width: 360px;
+            width: 380px;
             background: var(--sidebar-wood);
-            border-left: 10px solid #5d361b;
+            border-left: 10px solid var(--sidebar-inner);
             padding: 20px;
             display: flex;
             flex-direction: column;
@@ -63,245 +65,232 @@
             box-shadow: inset 15px 0 30px rgba(0,0,0,0.4);
         }
 
+        .hud-top { display: flex; align-items: center; justify-content: space-between; }
+        
         .life-bar-wrap {
-            height: 45px; background: #333; border-radius: 12px;
-            border: 5px solid #5d361b; position: relative; overflow: hidden;
+            width: 220px; height: 45px; background: #333;
+            border-radius: 12px; border: 5px solid var(--sidebar-inner);
+            position: relative; overflow: hidden;
         }
         #life-fill { width: 100%; height: 100%; background: #3498db; transition: width 0.3s; }
-        .life-txt { position: absolute; width:100%; text-align:center; top:5px; color:white; font-size:24px; }
+        .life-txt { position: absolute; width:100%; text-align:center; top:5px; color:white; font-size:26px; }
 
         .round-card {
-            background: rgba(0,0,0,0.3); border: 5px solid #5d361b;
-            border-radius: 15px; padding: 10px; text-align: center;
-            font-size: 38px; color: white;
+            background: rgba(0,0,0,0.3); border: 6px solid var(--sidebar-inner);
+            border-radius: 20px; padding: 12px; text-align: center;
+            font-size: 45px; color: white; margin: 5px 0;
         }
 
-        #shop-grid {
+        #blook-grid {
             display: grid; grid-template-columns: repeat(3, 1fr);
-            gap: 10px; background: rgba(0,0,0,0.25);
-            padding: 10px; border-radius: 12px;
-            overflow-y: auto; max-height: 480px;
+            gap: 8px; background: rgba(0,0,0,0.2);
+            padding: 12px; border-radius: 15px;
+            overflow-y: auto; max-height: 520px;
         }
 
-        .shop-item {
-            background: rgba(255, 255, 255, 0.1); border-radius: 10px;
+        .blook-slot {
+            background: rgba(255, 255, 255, 0.1); border-radius: 12px;
             padding: 5px; text-align: center; cursor: pointer;
             border: 4px solid transparent; transition: 0.1s;
         }
-        .shop-item:hover { background: rgba(255, 255, 255, 0.2); }
-        .shop-item.selected { border-color: #f1c40f; background: rgba(241, 196, 15, 0.2); }
+        .blook-slot:hover { background: rgba(255, 255, 255, 0.15); }
+        .blook-slot.active { border-color: #f1c40f; background: rgba(241, 196, 15, 0.2); }
 
-        .item-icon {
-            width: 65px; height: 65px; background: #fff;
-            margin: 0 auto 5px; border-radius: 10px;
+        .f-icon-box {
+            width: 70px; height: 70px; background: #fff;
+            margin: 0 auto 5px; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 40px; box-shadow: 0 5px 0 rgba(0,0,0,0.3);
+            font-size: 45px; box-shadow: 0 5px 0 rgba(0,0,0,0.3);
         }
-        .item-cost { background: #3498db; color: white; display: block; border-radius: 6px; font-size: 16px; }
+        .f-cost-label { background: #3498db; color: white; display: block; border-radius: 8px; font-size: 18px; }
 
-        /* Action Menus */
-        .btn {
+        /* Buttons & Popups */
+        .game-btn {
             background: #3498db; border: none; border-bottom: 8px solid #2980b9;
-            color: white; padding: 15px; font-size: 30px; border-radius: 15px;
-            cursor: pointer; font-family: var(--stat-font);
+            color: white; padding: 15px; font-size: 36px; border-radius: 20px;
+            cursor: pointer; font-family: var(--ui-font);
         }
-        .btn:active { transform: translateY(4px); border-bottom-width: 4px; }
+        .game-btn:active { transform: translateY(5px); border-bottom-width: 5px; }
 
-        #upgrade-menu {
-            background: rgba(0,0,0,0.8); border-radius: 20px;
+        #ctx-panel {
+            background: rgba(0,0,0,0.85); border-radius: 25px;
             padding: 20px; display: none; flex-direction: column;
             gap: 12px; border: 4px solid white;
         }
 
-        #speed-btn { margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        #speed-toggle { margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 10px; }
 
-        /* Difficulty Overlay */
         .overlay {
-            position: absolute; inset: 0; background: rgba(0,0,0,0.95);
+            position: absolute; inset: 0; background: rgba(0,0,0,0.9);
             display: flex; flex-direction: column; justify-content: center;
-            align-items: center; z-index: 200; gap: 20px;
+            align-items: center; z-index: 500; gap: 30px;
         }
-
-        #game-over { display: none; }
     </style>
 </head>
 <body>
 
-    <div id="container">
-        <!-- Difficulty Choice -->
-        <div id="diff-screen" class="overlay">
-            <h1 style="font-size: 100px; color: var(--purple-ui); margin-bottom: 30px;">FIGHTER DEFENSE</h1>
-            <p style="font-size: 30px; color: white;">Select Difficulty</p>
+    <div id="game-scaler">
+        <!-- Start / Difficulty Screen -->
+        <div id="start-screen" class="overlay">
+            <h1 style="font-size: 90px; color:white; text-shadow: 5px 5px var(--dark-purple);">FIGHTER DEFENSE</h1>
+            <p style="font-size: 32px; color: #ccc;">Select Difficulty</p>
             <div style="display: flex; gap: 20px;">
-                <button class="btn" style="background:#2ecc71; border-color:#27ae60" onclick="startWithDiff('easy')">EASY</button>
-                <button class="btn" style="background:#f39c12; border-color:#e67e22" onclick="startWithDiff('med')">MEDIUM</button>
-                <button class="btn" style="background:#e74c3c; border-color:#c0392b" onclick="startWithDiff('hard')">HARD</button>
+                <button class="game-btn" style="background:#2ecc71; border-color:#27ae60" onclick="startGame('easy')">EASY</button>
+                <button class="game-btn" onclick="startGame('normal')">NORMAL</button>
+                <button class="game-btn" style="background:#e74c3c; border-color:#c0392b" onclick="startGame('hard')">HARD</button>
             </div>
         </div>
 
-        <!-- Lose Screen -->
-        <div id="game-over" class="overlay">
+        <!-- Defeat Screen -->
+        <div id="defeat-screen" class="overlay" style="display:none">
             <h1 style="font-size: 120px; color:#e74c3c">DEFEAT</h1>
-            <p style="font-size: 40px; color:white">Survived Round <span id="final-round">1</span></p>
-            <button class="btn" style="width: 300px" onclick="location.reload()">TRY AGAIN</button>
+            <p style="font-size: 40px; color:white">Round Reached: <span id="res-round">1</span></p>
+            <button class="game-btn" style="width: 350px" onclick="location.reload()">TRY AGAIN</button>
         </div>
 
-        <!-- Header -->
         <div id="header">
-            <div class="gold-display"><span id="gold-ui">400</span> <span style="color:#f1c40f">🪙</span></div>
+            <div class="gold-box"><span id="gold-val">400</span> <span style="color:#f1c40f">🪙</span></div>
         </div>
 
-        <div id="game-layout">
-            <div id="view-area">
+        <div id="main-container">
+            <div id="canvas-holder">
                 <canvas id="gameCanvas"></canvas>
             </div>
 
-            <!-- Sidebar -->
             <div id="sidebar">
-                <div class="life-bar-wrap">
-                    <div id="life-fill"></div>
-                    <div class="life-txt"><span id="health-ui">100</span> ❤️</div>
-                </div>
-
-                <div class="round-card">Round <span id="round-ui">1</span></div>
-
-                <div id="shop-grid"></div>
-
-                <!-- Context Panel (Upgrade/Sell) -->
-                <div id="upgrade-menu">
-                    <div id="u-name" style="color:#f1c40f; font-size: 28px;">Fighter</div>
-                    <div id="u-stats" style="color:#ccc; font-size: 16px;">Level 1</div>
-                    <button class="btn" style="font-size: 20px" onclick="doUpgrade()">UPGRADE (<span id="u-cost">50</span>)</button>
-                    <div style="display: flex; gap: 10px;">
-                        <button class="btn" style="flex:1; background:#e67e22; border-color:#d35400; font-size:18px" onclick="doSell()">SELL (<span id="s-val">0</span>)</button>
-                        <button class="btn" style="flex:1; background:#e74c3c; border-color:#c0392b; font-size:18px" onclick="closeContext()">CLOSE</button>
+                <div class="hud-top">
+                    <div class="life-bar-wrap">
+                        <div id="life-fill"></div>
+                        <div class="life-txt"><span id="health-val">100</span> ❤️</div>
                     </div>
                 </div>
 
-                <button id="speed-btn" class="btn" onclick="toggleSpeed()">
-                    <span id="speed-icon">▶️</span> <span id="speed-txt">x1</span>
+                <div class="round-card">Round <span id="round-val">1</span></div>
+
+                <div id="blook-grid"></div>
+
+                <!-- Seller / Upgrade Menu -->
+                <div id="ctx-panel">
+                    <div id="ctx-name" style="color:#f1c40f; font-size: 32px;">Blook</div>
+                    <div id="ctx-meta" style="color:#ddd; font-size: 18px;">Level 1</div>
+                    <button class="game-btn" style="font-size: 22px; padding: 10px" onclick="upgradeSelected()">UPGRADE (<span id="up-cost">50</span>)</button>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="game-btn" style="flex:1; background:#e67e22; border-color:#d35400; font-size:20px" onclick="sellSelected()">SELL (<span id="sell-val">0</span>)</button>
+                        <button class="game-btn" style="flex:1; background:#e74c3c; border-color:#c0392b; font-size:20px" onclick="closeCtx()">CLOSE</button>
+                    </div>
+                </div>
+
+                <button id="speed-toggle" class="game-btn" onclick="toggleSpeed()">
+                    <span id="spd-icon">▶️</span> <span id="spd-txt">x1</span>
                 </button>
             </div>
         </div>
     </div>
 
     <script>
-        const container = document.getElementById('container');
+        const scaler = document.getElementById('game-scaler');
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        // Settings
-        const TILE = 75; 
-        const GW = 21; 
-        const GH = 14; 
-        
-        let gold = 400;
-        let health = 100;
-        let round = 1;
-        let speed = 1;
-        let waveActive = false;
-        let gameOver = false;
-        let diffConfig = { hpMult: 1, goldMult: 1 };
-        
-        let selectedShopIdx = -1;
-        let activeFighter = null;
-        let waypoints = [];
-        let fighters = [];
-        let enemies = [];
-        let projectiles = [];
+        let gold = 400; let health = 100; let round = 1; let gameSpeed = 1;
+        let isRunning = false; let waveActive = false; let over = false;
+        let shopSelection = -1; let activeFighter = null;
+        let diffMult = 1;
 
-        const FIGHTER_DATA = [
-            { id:0, icon: "🐥", name: "Chick", cost: 30, range: 170, dmg: 10, rate: 45, col: "#f1c40f" },
-            { id:1, icon: "🐿️", name: "Squirrel", cost: 50, range: 200, dmg: 18, rate: 50, col: "#e67e22" },
-            { id:2, icon: "🐒", name: "Monkey", cost: 70, range: 230, dmg: 22, rate: 55, col: "#9b59b6" },
-            { id:3, icon: "🐉", name: "Dragon", cost: 250, range: 450, dmg: 150, rate: 120, col: "#e74c3c" },
-            { id:4, icon: "🦉", name: "Owl", cost: 60, range: 220, dmg: 12, rate: 25, col: "#34495e" },
-            { id:5, icon: "🐱", name: "Cat", cost: 35, range: 150, dmg: 8, rate: 30, col: "#f39c12" },
-            { id:6, icon: "🐡", name: "Puffer", cost: 55, range: 180, dmg: 25, rate: 70, col: "#3498db" },
-            { id:7, icon: "🐺", name: "Wolf", cost: 90, range: 260, dmg: 50, rate: 60, col: "#bdc3c7" },
-            { id:8, icon: "👽", name: "Alien", cost: 120, range: 300, dmg: 15, rate: 12, col: "#1dd1a1" }
+        let fighters = []; let enemies = []; let projectiles = [];
+        const TILE = 72; const GW = 22; const GH = 14; 
+        let path = [];
+
+        const DATA = [
+            { icon: "🐥", name: "Chick", cost: 30, range: 160, dmg: 10, rate: 45, col: "#f1c40f" },
+            { icon: "🐿️", name: "Squirrel", cost: 50, range: 190, dmg: 18, rate: 50, col: "#e67e22" },
+            { icon: "🦍", name: "Gorilla", cost: 70, range: 220, dmg: 25, rate: 55, col: "#5f27cd" },
+            { icon: "🐉", name: "Dragon", cost: 250, range: 450, dmg: 140, rate: 120, col: "#e74c3c" },
+            { icon: "🦉", name: "Owl", cost: 60, range: 240, dmg: 12, rate: 25, col: "#34495e" },
+            { icon: "🐱", name: "Cat", cost: 35, range: 150, dmg: 8, rate: 35, col: "#f39c12" },
+            { icon: "🐷", name: "Pig", cost: 50, range: 180, dmg: 22, rate: 70, col: "#ff9ff3" },
+            { icon: "🦌", name: "Deer", cost: 90, range: 280, dmg: 40, rate: 60, col: "#bdc3c7" },
+            { icon: "👽", name: "Alien", cost: 120, range: 350, dmg: 20, rate: 15, col: "#1dd1a1" }
         ];
 
-        function handleResize() {
+        function resize() {
             const ww = window.innerWidth;
             const wh = window.innerHeight;
-            const scale = Math.min(ww / 1920, wh / 1080);
-            container.style.transform = `scale(${scale})`;
-            canvas.width = 1920 - 360;
-            canvas.height = 1080 - 70;
+            const s = Math.min(ww/1920, wh/1080);
+            scaler.style.transform = `scale(${s})`;
+            canvas.width = 1920 - 380;
+            canvas.height = 1080 - 75;
         }
 
-        function generatePath() {
-            waypoints = [];
+        function createPath() {
+            path = [];
             let cx = 3, cy = 0;
-            waypoints.push({x: cx*TILE + TILE/2, y: -TILE});
-            waypoints.push({x: cx*TILE + TILE/2, y: cy*TILE + TILE/2});
-            while (cx < 18 && cy < GH-2) {
-                if (Math.random() > 0.6 && cx < 16) cx += Math.floor(Math.random()*4)+2;
+            path.push({x: cx*TILE + TILE/2, y: -TILE});
+            path.push({x: cx*TILE + TILE/2, y: cy*TILE + TILE/2});
+            while (cx < 18 && cy < 11) {
+                if (Math.random() > 0.5 && cx < 16) cx += Math.floor(Math.random()*4)+2;
                 else cy += Math.floor(Math.random()*3)+2;
-                waypoints.push({x: cx*TILE + TILE/2, y: cy*TILE + TILE/2});
+                path.push({x: cx*TILE + TILE/2, y: cy*TILE + TILE/2});
             }
-            waypoints.push({x: 1700, y: cy*TILE + TILE/2});
+            path.push({x: 1800, y: cy*TILE + TILE/2});
         }
 
-        function startWithDiff(mode) {
-            document.getElementById('diff-screen').style.display = 'none';
-            if(mode === 'easy') { gold = 600; diffConfig = { hpMult: 0.7, goldMult: 1.5 }; }
-            if(mode === 'med') { gold = 400; diffConfig = { hpMult: 1.0, goldMult: 1.0 }; }
-            if(mode === 'hard') { gold = 300; diffConfig = { hpMult: 1.4, goldMult: 0.8 }; }
+        function startGame(mode) {
+            document.getElementById('start-screen').style.display = 'none';
+            if (mode === 'easy') { gold = 500; diffMult = 0.7; }
+            else if (mode === 'hard') { gold = 300; diffMult = 1.5; }
             
+            isRunning = true;
             init();
         }
 
         function init() {
-            const grid = document.getElementById('shop-grid');
-            FIGHTER_DATA.forEach((f, i) => {
-                const div = document.createElement('div');
-                div.className = 'shop-item';
-                div.onclick = () => selectShop(i, div);
-                div.innerHTML = `<div class="item-icon" style="background:${f.col}">${f.icon}</div><span class="item-cost">${f.cost}</span>`;
-                grid.appendChild(div);
+            const grid = document.getElementById('blook-grid');
+            DATA.forEach((f, i) => {
+                const d = document.createElement('div');
+                d.className = 'blook-slot';
+                d.onclick = () => {
+                    shopSelection = i; activeFighter = null;
+                    document.getElementById('ctx-panel').style.display = 'none';
+                    document.querySelectorAll('.blook-slot').forEach(s => s.classList.remove('active'));
+                    d.classList.add('active');
+                };
+                d.innerHTML = `<div class="f-icon-box" style="background:${f.col}">${f.icon}</div><span class="f-cost-label">${f.cost}</span>`;
+                grid.appendChild(d);
             });
-            
-            generatePath();
+            createPath();
             updateStats();
             loop();
         }
 
-        function selectShop(idx, el) {
-            selectedShopIdx = idx;
-            activeFighter = null;
-            document.getElementById('upgrade-menu').style.display = 'none';
-            document.querySelectorAll('.shop-item').forEach(i => i.classList.remove('selected'));
-            el.classList.add('selected');
-        }
-
-        /** CLICK FIX & SELLING **/
+        /** CLICK COORDINATE FIX **/
         canvas.addEventListener('mousedown', (e) => {
-            if (gameOver) return;
-            const b = canvas.getBoundingClientRect();
-            // Important: map client coordinates based on scale
-            const containerRect = container.getBoundingClientRect();
-            const scale = 1920 / containerRect.width;
+            if (!isRunning || over) return;
+            const rect = scaler.getBoundingClientRect();
+            const s = 1920 / rect.width;
             
-            // Mouse X is relative to the container, minus sidebar width if needed
-            const mx = (e.clientX - containerRect.left) * scale;
-            const my = (e.clientY - containerRect.top - 70 * (containerRect.height/1080)) * scale;
+            // Logical XY inside 1920x1080 container
+            const lx = (e.clientX - rect.left) * s;
+            const ly = (e.clientY - rect.top) * s;
 
-            const gx = Math.floor(mx/TILE);
-            const gy = Math.floor(my/TILE);
+            // Offset by top header (75px logical)
+            const my = ly - 75;
+            const mx = lx;
 
-            const existing = fighters.find(f => f.gx === gx && f.gy === gy);
+            const targetGX = Math.floor(mx/TILE);
+            const targetGY = Math.floor(my/TILE);
+
+            const existing = fighters.find(f => f.gx === targetGX && f.gy === targetGY);
             if (existing) {
-                openContext(existing);
+                openCtx(existing);
                 return;
             }
 
-            if (selectedShopIdx !== -1) {
-                const data = FIGHTER_DATA[selectedShopIdx];
-                if (gold >= data.cost && !isPath(gx, gy) && gx > 2) {
-                    gold -= data.cost;
-                    fighters.push(new Fighter(gx, gy, data));
+            if (shopSelection !== -1) {
+                const dat = DATA[shopSelection];
+                if (gold >= dat.cost && !isPath(targetGX, targetGY) && targetGX > 2) {
+                    gold -= dat.cost;
+                    fighters.push(new Fighter(targetGX, targetGY, dat));
                     updateStats();
                 }
             }
@@ -309,104 +298,97 @@
 
         function isPath(gx, gy) {
             const px = gx*TILE + TILE/2, py = gy*TILE+TILE/2;
-            for(let i=0; i<waypoints.length-1; i++) {
-                const v=waypoints[i], w=waypoints[i+1], l2=(v.x-w.x)**2+(v.y-w.y)**2;
+            for(let i=0; i < path.length-1; i++) {
+                const v=path[i], w=path[i+1], l2=(v.x-w.x)**2+(v.y-w.y)**2;
                 let t = Math.max(0, Math.min(1, ((px-v.x)*(w.x-v.x) + (py-v.y)*(w.y-v.y))/l2));
-                const dist = Math.hypot(px - (v.x + t*(w.x-v.x)), py - (v.y + t*(w.y-v.y)));
-                if (dist < TILE * 0.8) return true;
+                const d = Math.hypot(px - (v.x + t*(w.x-v.x)), py - (v.y + t*(w.y-v.y)));
+                if (d < TILE * 0.8) return true;
             }
             return false;
         }
 
-        function openContext(f) {
+        function toggleSpeed() {
+            gameSpeed = gameSpeed === 1 ? 3 : 1;
+            document.getElementById('spd-icon').innerText = gameSpeed === 1 ? '▶️' : '⏩';
+            document.getElementById('spd-txt').innerText = 'x' + gameSpeed;
+        }
+
+        function openCtx(f) {
             activeFighter = f;
-            selectedShopIdx = -1;
-            document.querySelectorAll('.shop-item').forEach(i => i.classList.remove('selected'));
-            document.getElementById('upgrade-menu').style.display = 'flex';
-            document.getElementById('u-name').innerText = f.data.name;
-            document.getElementById('u-stats').innerText = `Lv ${f.lvl} | Power: ${Math.round(f.data.dmg)}`;
-            document.getElementById('u-cost').innerText = f.lvl * 90;
-            document.getElementById('s-val').innerText = Math.floor(f.spent * 0.75);
+            shopSelection = -1;
+            document.querySelectorAll('.blook-slot').forEach(s => s.classList.remove('active'));
+            document.getElementById('ctx-panel').style.display = 'flex';
+            document.getElementById('ctx-name').innerText = f.data.name;
+            document.getElementById('ctx-meta').innerText = `Level ${f.lvl} | Power: ${Math.round(f.data.dmg)}`;
+            document.getElementById('up-cost').innerText = f.lvl * 90;
+            document.getElementById('sell-val').innerText = Math.floor(f.spent * 0.7);
         }
 
-        function closeContext() {
-            activeFighter = null;
-            document.getElementById('upgrade-menu').style.display = 'none';
-        }
-
-        function doUpgrade() {
+        function upgradeSelected() {
             if (!activeFighter) return;
             const cost = activeFighter.lvl * 90;
             if (gold >= cost) {
-                gold -= cost;
-                activeFighter.spent += cost;
+                gold -= cost; activeFighter.spent += cost;
                 activeFighter.lvl++;
-                activeFighter.data.dmg *= 1.6;
-                activeFighter.data.range += 25;
-                activeFighter.data.rate *= 0.9;
-                openContext(activeFighter);
-                updateStats();
+                activeFighter.data.dmg *= 1.6; activeFighter.data.range += 30; activeFighter.data.rate *= 0.9;
+                openCtx(activeFighter); updateStats();
             }
         }
 
-        function doSell() {
+        function sellSelected() {
             if (!activeFighter) return;
-            gold += Math.floor(activeFighter.spent * 0.75);
+            gold += Math.floor(activeFighter.spent * 0.7);
             fighters = fighters.filter(f => f !== activeFighter);
-            closeContext();
-            updateStats();
+            closeCtx(); updateStats();
+        }
+
+        function closeCtx() { activeFighter = null; document.getElementById('ctx-panel').style.display = 'none'; }
+
+        function updateStats() {
+            document.getElementById('gold-val').innerText = Math.floor(gold);
+            document.getElementById('health-val').innerText = Math.max(0, health);
+            document.getElementById('life-fill').style.width = health + "%";
+            document.getElementById('round-val').innerText = round;
         }
 
         class Enemy {
             constructor() {
-                this.x = waypoints[0].x; this.y = waypoints[0].y;
+                this.x = path[0].x; this.y = path[0].y;
                 this.targetIdx = 1;
-                // Stronger enemy scaling
-                this.type = Math.random();
-                let baseHp = 60 + (round * 55 * diffConfig.hpMult);
-                let baseSpd = 2.0 + (round * 0.06);
-
-                if (this.type < 0.1) { // Tank
-                    this.hp = baseHp * 3; this.maxHp = this.hp; this.spd = baseSpd * 0.6; this.icon = "🧱"; this.val = 30;
-                } else if (this.type < 0.25) { // Fast
-                    this.hp = baseHp * 0.5; this.maxHp = this.hp; this.spd = baseSpd * 2.2; this.icon = "⚡"; this.val = 15;
-                } else { // Standard
-                    this.hp = baseHp; this.maxHp = this.hp; this.spd = baseSpd; this.icon = "📦"; this.val = 20;
-                }
-                this.val = Math.floor(this.val * diffConfig.goldMult);
+                this.maxHp = 60 + (round * 60 * diffMult);
+                this.hp = this.maxHp;
+                this.spd = 2.0 + (round * 0.05);
+                this.icon = Math.random() > 0.85 ? "🧱" : "📦";
+                if (this.icon === "🧱") { this.hp *= 3; this.maxHp *= 3; this.spd *= 0.6; }
             }
             update() {
-                const goal = waypoints[this.targetIdx];
-                const dx = goal.x - this.x, dy = goal.y - this.y;
-                const dist = Math.hypot(dx, dy);
-                const step = this.spd * speed;
-                if (dist < step) {
+                const g = path[this.targetIdx];
+                const dx = g.x - this.x, dy = g.y - this.y, d = Math.hypot(dx, dy);
+                const step = this.spd * gameSpeed;
+                if (d < step) {
                     this.targetIdx++;
-                    if (this.targetIdx >= waypoints.length) {
-                        health -= 5; this.hp = -10000;
-                        updateStats();
+                    if (this.targetIdx >= path.length) {
+                        health -= 5; this.hp = -10000; updateStats();
                         if (health <= 0) doGameOver();
                     }
-                } else { this.x += (dx/dist)*step; this.y += (dy/dist)*step; }
+                } else { this.x += (dx/d)*step; this.y += (dy/d)*step; }
             }
             draw() {
                 ctx.font = "50px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
                 ctx.fillText(this.icon, this.x, this.y + 10);
-                // Health bar
-                ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.fillRect(this.x - 30, this.y - 45, 60, 8);
-                ctx.fillStyle = "#2ecc71"; ctx.fillRect(this.x - 30, this.y - 45, 60 * (Math.max(0, this.hp/this.maxHp)), 8);
+                ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.fillRect(this.x-30, this.y-45, 60, 8);
+                ctx.fillStyle = "#2ecc71"; ctx.fillRect(this.x-30, this.y-45, 60 * (Math.max(0, this.hp/this.maxHp)), 8);
             }
         }
 
         class Fighter {
             constructor(gx, gy, d) {
                 this.gx = gx; this.gy = gy;
-                this.x = gx*TILE + TILE/2; this.y = gy*TILE + TILE/2;
-                this.data = JSON.parse(JSON.stringify(d));
-                this.lvl = 1; this.cd = 0; this.spent = d.cost;
+                this.x = gx*TILE+TILE/2; this.y = gy*TILE+TILE/2;
+                this.data = JSON.parse(JSON.stringify(d)); this.lvl = 1; this.cd = 0; this.spent = d.cost;
             }
             update() {
-                if (this.cd > 0) this.cd -= speed;
+                if (this.cd > 0) this.cd -= gameSpeed;
                 if (this.cd <= 0) {
                     const t = enemies.find(e => Math.hypot(e.x - this.x, e.y - this.y) < this.data.range);
                     if (t) {
@@ -419,61 +401,47 @@
                 ctx.save(); ctx.globalAlpha = 0.65; ctx.fillStyle = this.data.col;
                 ctx.beginPath(); ctx.roundRect(this.x-32, this.y-32, 64, 64, 12); ctx.fill();
                 ctx.globalAlpha = 1.0; ctx.font = "50px Arial"; ctx.textAlign = "center";
-                ctx.textBaseline = "middle"; ctx.fillText(this.data.icon, this.x, this.y + 4);
+                ctx.textBaseline = "middle"; ctx.fillText(this.data.icon, this.x, this.y+4);
                 if (activeFighter === this) {
                     ctx.beginPath(); ctx.arc(this.x, this.y, this.data.range, 0, Math.PI*2);
-                    ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.stroke();
+                    ctx.strokeStyle = "rgba(255,255,255,0.2)"; ctx.stroke();
                 }
                 ctx.restore();
             }
         }
 
         class Projectile {
-            constructor(x,y,t,dmg,col) { this.x=x;this.y=y;this.t=t;this.dmg=dmg;this.col=col;this.dead=false;}
+            constructor(x,y,t,dmg,col) { this.x=x;this.y=y;this.t=t;this.dmg=dmg;this.col=col;this.dead=false; }
             update() {
-                const dx=this.t.x-this.x, dy=this.t.y-this.y, d=Math.hypot(dx,dy), step=22*speed;
-                if (d<step) {
-                    this.t.hp -= this.dmg; this.dead=true;
-                    if (this.t.hp <= 0 && this.t.hp > -5000) { gold += this.t.val; updateStats(); }
+                const dx=this.t.x-this.x, dy=this.t.y-this.y, d=Math.hypot(dx,dy), step=22*gameSpeed;
+                if (d < step) {
+                    this.t.hp -= this.dmg; 
+                    gold += 1; // 1 COIN PER HIT
+                    updateStats();
+                    this.dead = true;
                 } else { this.x+=(dx/d)*step; this.y+=(dy/d)*step; }
             }
-            draw() { ctx.fillStyle=this.col; ctx.beginPath(); ctx.arc(this.x,this.y,10,0,Math.PI*2); ctx.fill(); }
+            draw() {
+                ctx.fillStyle=this.col; ctx.beginPath(); ctx.arc(this.x,this.y,10,0,Math.PI*2); ctx.fill();
+            }
         }
 
-        function updateStats() {
-            document.getElementById('gold-ui').innerText = Math.floor(gold);
-            document.getElementById('round-ui').innerText = round;
-            document.getElementById('health-ui').innerText = Math.max(0, health);
-            document.getElementById('life-fill').style.width = Math.max(0, health) + "%";
-        }
-
-        function toggleSpeed() {
-            speed = speed === 1 ? 3 : 1;
-            document.getElementById('speed-icon').innerText = speed === 1 ? '▶️' : '⏩';
-            document.getElementById('speed-txt').innerText = 'x' + speed;
-        }
-
-        function doGameOver() {
-            gameOver = true;
-            document.getElementById('game-over').style.display = 'flex';
-            document.getElementById('final-round').innerText = round;
-        }
+        function doGameOver() { over = true; document.getElementById('defeat-screen').style.display = 'flex'; document.getElementById('res-round').innerText = round; }
 
         function loop() {
-            if (gameOver) return;
+            if (!isRunning || over) return;
             ctx.clearRect(0,0, canvas.width, canvas.height);
             
-            // Map
-            ctx.fillStyle = "#3498db"; ctx.fillRect(0,0, canvas.width, canvas.height);
-            ctx.fillStyle = "#8b4513"; ctx.fillRect(TILE*2, 0, TILE, canvas.height);
+            // Background
+            ctx.fillStyle = "#3498db"; ctx.fillRect(0,0, canvas.width, canvas.height); // Sea
+            ctx.fillStyle = "#8b4513"; ctx.fillRect(TILE*2, 0, TILE, canvas.height); // Cliff
             for(let y=0; y<GH; y++) for(let x=3; x<GW; x++) {
-                ctx.fillStyle = (x+y)%2 === 0 ? "#2ecc71" : "#27ae60";
-                ctx.fillRect(x*TILE, y*TILE, TILE, TILE);
+                ctx.fillStyle = (x+y)%2 === 0 ? "#2ecc71" : "#27ae60"; ctx.fillRect(x*TILE, y*TILE, TILE, TILE);
             }
-            ctx.strokeStyle = "#8b4513"; ctx.lineWidth = TILE+10; ctx.lineCap = "round"; ctx.lineJoin = "round";
-            ctx.beginPath(); ctx.moveTo(waypoints[0].x, waypoints[0].y);
-            waypoints.forEach(p => ctx.lineTo(p.x, p.y)); ctx.stroke();
-            ctx.strokeStyle = "#a0522d"; ctx.lineWidth = TILE-10; ctx.stroke();
+            // Path
+            ctx.strokeStyle="#8b4513"; ctx.lineWidth=TILE+12; ctx.lineCap="round"; ctx.lineJoin="round";
+            ctx.beginPath(); ctx.moveTo(path[0].x, path[0].y); path.forEach(p => ctx.lineTo(p.x, p.y)); ctx.stroke();
+            ctx.strokeStyle="#a0522d"; ctx.lineWidth=TILE-8; ctx.stroke();
 
             fighters.forEach(f => { f.update(); f.draw(); });
             enemies = enemies.filter(e => e.hp > 0);
@@ -482,28 +450,25 @@
             projectiles.forEach(p => { p.update(); p.draw(); });
 
             if (!waveActive && enemies.length === 0) {
-                waveActive = true;
-                let c = 0, n = 10 + round*5;
+                waveActive = true; let c=0, n = 10 + round*5;
                 let t = setInterval(() => {
-                    if (gameOver) { clearInterval(t); return; }
+                    if (over) { clearInterval(t); return; }
                     enemies.push(new Enemy());
                     if (++c >= n) {
-                        clearInterval(t);
-                        let check = setInterval(() => {
-                            if (enemies.length === 0) {
-                                clearInterval(check); waveActive = false; round++; 
-                                gold += 100 * round; updateStats(); 
+                        clearInterval(t); 
+                        let ck = setInterval(() => {
+                            if (enemies.length === 0) { 
+                                clearInterval(ck); waveActive = false; round++; gold += round*50; updateStats(); 
                             }
                         }, 500);
                     }
-                }, 800 / speed);
+                }, 800 / gameSpeed);
             }
-
             requestAnimationFrame(loop);
         }
 
-        window.addEventListener('resize', handleResize);
-        handleResize();
+        window.addEventListener('resize', resize);
+        resize();
     </script>
 </body>
 </html>
