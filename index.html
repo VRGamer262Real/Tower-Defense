@@ -3,20 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tower Defense</title>
+    <title>Fighter Defense - Pro</title>
     <style>
         :root {
             --purple-ui: #9b59b6;
-            --sidebar-wood: #8b4513;
-            --sidebar-dark: #5d2e0d;
+            --sidebar-wood: #7d4d2d;
+            --sidebar-inner: #5d361b;
             --btn-blue: #3498db;
             --btn-green: #2ecc71;
+            --gold: #f1c40f;
+            --heart: #e74c3c;
             --ui-font: 'Arial Black', Gadget, sans-serif;
         }
 
         body {
             margin: 0;
-            background: #1a1a1a;
+            background: #121212;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -27,169 +29,205 @@
             user-select: none;
         }
 
-        #game-area {
-            width: 1100px;
-            height: 750px;
+        #game-wrapper {
+            width: 1150px;
+            height: 800px;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 80px rgba(0,0,0,0.8);
-            border: 5px solid #333;
-            border-radius: 15px;
+            box-shadow: 0 0 100px rgba(0,0,0,0.9);
+            border: 6px solid #222;
+            border-radius: 20px;
             overflow: hidden;
+            position: relative;
         }
 
-        /* Header Bar */
+        /* --- Header --- */
         #header {
-            height: 60px;
+            height: 65px;
             background: var(--purple-ui);
-            border-bottom: 5px solid #8e44ad;
+            border-bottom: 6px solid #8e44ad;
             display: flex;
             justify-content: flex-end;
             align-items: center;
-            padding: 0 40px;
-            gap: 40px;
-            font-size: 28px;
+            padding: 0 50px;
+            gap: 50px;
+            z-index: 10;
         }
 
-        .stat-box { display: flex; align-items: center; gap: 10px; }
-        .gold-icon { color: #f1c40f; }
-        .heart-icon { color: #e74c3c; }
+        .stat { display: flex; align-items: center; gap: 12px; font-size: 32px; text-shadow: 3px 3px 0 rgba(0,0,0,0.3); }
 
-        /* Content Area */
-        #main-container {
-            display: flex;
-            flex: 1;
-            background: #2c3e50;
-        }
+        /* --- Main Layout --- */
+        #main-container { display: flex; flex: 1; background: #2c3e50; }
 
-        #canvas-container {
-            position: relative;
-            flex: 1;
-        }
+        #canvas-view { position: relative; flex: 1; background: #27ae60; }
+        canvas { display: block; cursor: crosshair; image-rendering: pixelated; }
 
-        canvas { display: block; background: #27ae60; cursor: crosshair; }
-
-        /* Sidebar Styles */
+        /* --- Sidebar --- */
         #sidebar {
-            width: 280px;
+            width: 320px;
             background: var(--sidebar-wood);
-            border-left: 6px solid var(--sidebar-dark);
-            padding: 15px;
+            border-left: 8px solid var(--sidebar-inner);
+            padding: 20px;
             display: flex;
             flex-direction: column;
             gap: 15px;
+            box-shadow: inset 10px 0 20px rgba(0,0,0,0.4);
         }
 
-        #round-card {
-            background: #e74c3c;
-            border: 4px solid #c0392b;
-            border-radius: 12px;
-            padding: 12px;
+        #round-display {
+            background: #e67e22;
+            border: 5px solid #d35400;
+            border-radius: 15px;
+            padding: 10px;
             text-align: center;
-            font-size: 24px;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+            font-size: 28px;
+            color: white;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
         }
 
-        #shop-grid {
+        #shop-scroll {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            padding: 5px;
+            gap: 12px;
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 12px;
+            max-height: 420px;
+            overflow-y: auto;
         }
 
-        .shop-item {
-            background: rgba(0,0,0,0.3);
+        .fighter-card {
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 12px;
-            padding: 8px;
+            padding: 6px;
             text-align: center;
             cursor: pointer;
             border: 4px solid transparent;
-            transition: transform 0.1s;
+            transition: all 0.1s;
         }
 
-        .shop-item:hover { transform: scale(1.05); }
-        .shop-item.selected { border-color: #f1c40f; background: rgba(255, 255, 255, 0.15); }
+        .fighter-card:hover { transform: translateY(-3px); background: rgba(255, 255, 255, 0.2); }
+        .fighter-card.selected { border-color: var(--gold); background: rgba(241, 196, 15, 0.3); }
 
-        .item-icon {
-            width: 55px; height: 55px;
-            background: #f1c40f;
+        .f-icon {
+            width: 60px; height: 60px;
+            background: #fff;
             margin: 0 auto 5px;
             border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 35px;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.3);
+            font-size: 40px;
+            box-shadow: 0 5px 0 rgba(0,0,0,0.2);
         }
 
-        .item-cost {
-            background: #2980b9;
-            font-size: 14px;
-            border-radius: 6px;
-            padding: 2px 0;
+        .f-cost {
+            background: var(--btn-blue);
+            font-size: 16px;
+            border-radius: 8px;
             display: block;
+            padding: 2px 0;
         }
 
-        /* Action Panels */
-        #upgrade-panel {
-            background: rgba(0,0,0,0.5);
-            border-radius: 12px;
+        /* --- Screens & Overlays --- */
+        .overlay {
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.85);
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            z-index: 100;
+        }
+
+        #start-screen { background: radial-gradient(circle, #8e44ad, #2c3e50); }
+
+        .big-btn {
+            background: var(--btn-green);
+            border: none;
+            padding: 20px 60px;
+            font-size: 40px;
+            color: white;
+            border-radius: 20px;
+            border-bottom: 8px solid #27ae60;
+            cursor: pointer;
+            font-family: var(--ui-font);
+            transition: 0.1s;
+        }
+
+        .big-btn:active { transform: translateY(4px); border-bottom-width: 4px; }
+
+        #upgrade-ui {
+            background: rgba(0,0,0,0.6);
+            border-radius: 15px;
             padding: 15px;
             display: none;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
+            border: 2px solid rgba(255,255,255,0.1);
         }
 
-        .btn {
-            border: none; color: white; padding: 12px;
-            font-size: 20px; border-radius: 12px;
-            cursor: pointer; font-family: var(--ui-font);
-            text-align: center; border-bottom: 6px solid rgba(0,0,0,0.2);
+        #speed-control {
+            background: var(--btn-blue);
+            margin-top: auto;
+            height: 70px;
         }
 
-        .btn:active { transform: translateY(2px); border-bottom-width: 4px; }
-
-        #speed-btn { background: var(--btn-blue); margin-top: auto; }
-        #upgrade-btn { background: var(--btn-green); }
-
-        #game-over {
-            position: absolute; inset: 0;
-            background: rgba(0,0,0,0.9);
-            display: none; flex-direction: column;
-            justify-content: center; align-items: center;
-            z-index: 100;
+        /* Floating text animation */
+        @keyframes float-up {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-40px); }
+        }
+        .float-text {
+            position: absolute;
+            font-family: var(--ui-font);
+            pointer-events: none;
+            animation: float-up 0.8s forwards;
+            font-size: 20px;
+            z-index: 50;
         }
     </style>
 </head>
 <body>
 
-    <div id="game-area">
+    <div id="game-wrapper">
+        <!-- Start Screen -->
+        <div id="start-screen" class="overlay">
+            <h1 style="font-size: 80px; margin-bottom: 20px; text-shadow: 5px 5px 0 rgba(0,0,0,0.5);">FIGHTER DEFENSE</h1>
+            <p style="font-size: 20px; margin-bottom: 40px;">Protect the path with your ghost army!</p>
+            <button class="big-btn" onclick="startGame()">START GAME</button>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over" class="overlay" style="display: none;">
+            <h1 style="font-size: 80px; color: var(--heart);">DEFEATED!</h1>
+            <p style="font-size: 30px;">You reached Round <span id="final-round">1</span></p>
+            <button class="big-btn" style="background: var(--btn-blue); margin-top: 20px;" onclick="location.reload()">TRY AGAIN</button>
+        </div>
+
+        <!-- Top Bar -->
         <div id="header">
-            <div class="stat-box"><span id="gold">150</span> <span class="gold-icon">🪙</span></div>
-            <div class="stat-box"><span id="lives">100</span> <span class="heart-icon">❤️</span></div>
+            <div class="stat"><span id="gold-val">250</span> <span style="color:var(--gold)">🪙</span></div>
+            <div class="stat"><span id="lives-val">100</span> <span style="color:var(--heart)">❤️</span></div>
         </div>
 
         <div id="main-container">
-            <div id="canvas-container">
-                <canvas id="gameCanvas" width="820" height="690"></canvas>
-                <div id="game-over">
-                    <h1 style="font-size: 70px; color: #e74c3c; margin-bottom: 5px;">GAME OVER</h1>
-                    <p style="font-size: 24px;">Rounds Defended: <span id="final-round">0</span></p>
-                    <button class="btn" style="background:#3498db; width: 200px;" onclick="location.reload()">PLAY AGAIN</button>
-                </div>
+            <div id="canvas-view">
+                <canvas id="gameCanvas" width="830" height="735"></canvas>
             </div>
 
             <div id="sidebar">
-                <div id="round-card">Round <span id="round">1</span></div>
+                <div id="round-display">Round <span id="round-val">1</span></div>
                 
-                <div id="shop-grid"><!-- Fighters injected here --></div>
+                <div id="shop-scroll"><!-- Injected via JS --></div>
 
-                <div id="upgrade-panel">
-                    <div id="u-name" style="color:#f1c40f; font-size: 18px;">Fighter</div>
-                    <div id="u-stats" style="font-family: sans-serif; font-size: 13px; line-height: 1.4;">Level: 1<br>Dmg: 5 | Range: 100</div>
-                    <button id="upgrade-btn" class="btn" onclick="upgradeActiveFighter()">UPGRADE <br> (<span id="u-cost">50</span> 🪙)</button>
-                    <button class="btn" style="background:#e74c3c; font-size: 14px; padding: 5px;" onclick="closeUpgrade()">CLOSE</button>
+                <!-- Upgrade Panel (Hidden by default) -->
+                <div id="upgrade-ui">
+                    <div id="up-name" style="color: var(--gold); font-size: 20px;">Fighter</div>
+                    <div id="up-info" style="font-family: sans-serif; font-size: 14px; color: #ccc;">Level 1</div>
+                    <button class="big-btn" id="up-confirm-btn" style="font-size: 18px; padding: 10px; width: 100%;" onclick="performUpgrade()">
+                        UPGRADE (<span id="up-cost">50</span> 🪙)
+                    </button>
+                    <button class="big-btn" style="background: var(--heart); border-bottom-color: #c0392b; font-size: 14px; padding: 5px;" onclick="closeUpgradePanel()">CLOSE</button>
                 </div>
 
-                <button id="speed-btn" class="btn" onclick="toggleGameSpeed()">
+                <button id="speed-control" class="big-btn" onclick="toggleSpeed()">
                     ▶️ x1
                 </button>
             </div>
@@ -200,103 +238,157 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        // Settings
-        const TILE_SIZE = 45;
+        // --- Game Setup ---
+        const TILE_SIZE = 46;
         const GRID_W = 18;
-        const GRID_H = 15;
+        const GRID_H = 16;
 
-        const FIGHTER_DATA = [
-            { name: "Chick", icon: "🐥", cost: 30, range: 100, damage: 8, rate: 45, color: "#f1c40f" },
-            { name: "Squirrel", icon: "🐿️", cost: 50, range: 130, damage: 15, rate: 55, color: "#e67e22" },
-            { name: "Monkey", icon: "🐒", cost: 70, range: 150, damage: 12, rate: 25, color: "#9b59b6" },
-            { name: "Pig", icon: "🐷", cost: 40, range: 110, damage: 20, rate: 65, color: "#ff9ff3" },
-            { name: "Alien", icon: "👽", cost: 100, range: 200, damage: 10, rate: 15, color: "#1dd1a1" },
-            { name: "Dragon", icon: "🐉", cost: 200, range: 250, damage: 60, rate: 80, color: "#ee5253" }
+        const FIGHTER_LIB = [
+            { name: "Chick", icon: "🐥", cost: 30, range: 100, damage: 10, rate: 40, color: "#f1c40f" },
+            { name: "Monkey", icon: "🐒", cost: 50, range: 130, damage: 18, rate: 50, color: "#9b59b6" },
+            { name: "Owl", icon: "🦉", cost: 70, range: 160, damage: 12, rate: 20, color: "#34495e" },
+            { name: "Pig", icon: "🐷", cost: 40, range: 110, damage: 25, rate: 65, color: "#ff9ff3" },
+            { name: "Dragon", icon: "🐉", cost: 150, range: 250, damage: 70, rate: 85, color: "#e74c3c" },
+            { name: "Cat", icon: "🐱", cost: 35, range: 90, damage: 8, rate: 30, color: "#f39c12" },
+            { name: "Wolf", icon: "🐺", cost: 80, range: 140, damage: 35, rate: 55, color: "#bdc3c7" },
+            { name: "Fish", icon: "🐠", cost: 100, range: 180, damage: 15, rate: 10, color: "#3498db" }
         ];
 
-        // State
-        let gold = 150;
+        // --- State Variables ---
+        let gold = 250;
         let lives = 100;
         let round = 1;
-        let gameSpeed = 1;
-        let isGameOver = false;
-        let activeWave = false;
-        let spawning = false;
+        let playSpeed = 1;
+        let isRunning = false;
+        let waveTimer = 0;
+        let waveActive = false;
         
         let fighters = [];
         let enemies = [];
         let projectiles = [];
-        let selectedShopIdx = -1;
-        let activeSelection = null; // Currently clicked on-field fighter
+        let shopSelectionIdx = -1;
+        let activeFighter = null;
 
-        // Map Path (Pixel points)
-        const pathPoints = [
-            {x: 2, y: 0}, {x: 2, y: 4}, {x: 10, y: 4}, {x: 10, y: 9},
-            {x: 4, y: 9}, {x: 4, y: 13}, {x: 15, y: 13}, {x: 15, y: 7}, {x: 18, y: 7}
+        // --- Path Logic ---
+        const waypoints = [
+            {x: 3, y: 0}, {x: 3, y: 5}, {x: 12, y: 5}, {x: 12, y: 10},
+            {x: 5, y: 10}, {x: 5, y: 15}, {x: 18, y: 15}
         ].map(p => ({ x: p.x * TILE_SIZE + TILE_SIZE/2, y: p.y * TILE_SIZE + TILE_SIZE/2 }));
 
-        // Grid blockers (path areas)
-        const gridBlocks = Array(GRID_H).fill().map(() => Array(GRID_W).fill(false));
-
-        // Initialization
-        function init() {
-            const grid = document.getElementById('shop-grid');
-            FIGHTER_DATA.forEach((f, i) => {
-                const item = document.createElement('div');
-                item.className = 'shop-item';
-                item.id = `item-${i}`;
-                item.onclick = () => selectFromShop(i);
-                item.innerHTML = `<div class="item-icon" style="background:${f.color}">${f.icon}</div><span class="item-cost">${f.cost}</span>`;
-                grid.appendChild(item);
+        // Initial UI Draw
+        function setupShop() {
+            const grid = document.getElementById('shop-scroll');
+            FIGHTER_LIB.forEach((f, i) => {
+                const card = document.createElement('div');
+                card.className = 'fighter-card';
+                card.id = `shop-${i}`;
+                card.onclick = () => selectShopItem(i);
+                card.innerHTML = `
+                    <div class="f-icon" style="border: 3px solid ${f.color}">${f.icon}</div>
+                    <span class="f-cost">${f.cost}</span>
+                `;
+                grid.appendChild(card);
             });
-            updateStats();
-            requestAnimationFrame(gameLoop);
         }
 
-        function selectFromShop(i) {
-            selectedShopIdx = i;
-            activeSelection = null;
-            document.getElementById('upgrade-panel').style.display = 'none';
-            document.querySelectorAll('.shop-item').forEach(el => el.classList.remove('selected'));
-            document.getElementById(`item-${i}`).classList.add('selected');
+        // --- Core Functions ---
+
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            isRunning = true;
+            updateUI();
+            loop();
         }
 
-        function toggleGameSpeed() {
-            gameSpeed = gameSpeed === 1 ? 3 : 1;
-            document.getElementById('speed-btn').innerHTML = gameSpeed === 1 ? "▶️ x1" : "⏩ x3";
+        function toggleSpeed() {
+            playSpeed = playSpeed === 1 ? 3 : 1;
+            document.getElementById('speed-control').innerHTML = playSpeed === 1 ? "▶️ x1" : "⏩ x3";
         }
 
-        function updateStats() {
-            document.getElementById('gold').innerText = Math.floor(gold);
-            document.getElementById('lives').innerText = lives;
-            document.getElementById('round').innerText = round;
+        function updateUI() {
+            document.getElementById('gold-val').innerText = Math.floor(gold);
+            document.getElementById('lives-val').innerText = Math.max(0, lives);
+            document.getElementById('round-val').innerText = round;
+        }
+
+        function selectShopItem(idx) {
+            shopSelectionIdx = idx;
+            activeFighter = null;
+            document.getElementById('upgrade-ui').style.display = 'none';
+            document.querySelectorAll('.fighter-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById(`shop-${idx}`).classList.add('selected');
+        }
+
+        function openUpgradePanel(f) {
+            activeFighter = f;
+            shopSelectionIdx = -1;
+            document.querySelectorAll('.fighter-card').forEach(c => c.classList.remove('selected'));
+            
+            document.getElementById('upgrade-ui').style.display = 'flex';
+            document.getElementById('up-name').innerText = f.data.name;
+            document.getElementById('up-info').innerHTML = `Level: ${f.level}<br>Dmg: ${Math.round(f.data.damage)} | Range: ${Math.round(f.data.range)}`;
+            document.getElementById('up-cost').innerText = f.level * 60;
+        }
+
+        function performUpgrade() {
+            if (!activeFighter) return;
+            const cost = activeFighter.level * 60;
+            if (gold >= cost) {
+                gold -= cost;
+                activeFighter.level++;
+                activeFighter.data.damage *= 1.4;
+                activeFighter.data.range += 15;
+                activeFighter.data.rate *= 0.9;
+                updateUI();
+                openUpgradePanel(activeFighter);
+                spawnFloatText("UPGRADED!", activeFighter.x, activeFighter.y - 20, "#fff");
+            }
+        }
+
+        function closeUpgradePanel() {
+            activeFighter = null;
+            document.getElementById('upgrade-ui').style.display = 'none';
+        }
+
+        function spawnFloatText(txt, x, y, color) {
+            const el = document.createElement('div');
+            el.className = 'float-text';
+            el.innerText = txt;
+            el.style.left = (x + canvas.offsetLeft) + "px";
+            el.style.top = (y + canvas.offsetTop) + "px";
+            el.style.color = color;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 1000);
         }
 
         // --- Logic Classes ---
 
         class Enemy {
             constructor() {
-                this.x = pathPoints[0].x;
-                this.y = pathPoints[0].y;
+                this.x = waypoints[0].x;
+                this.y = waypoints[0].y;
                 this.targetIdx = 1;
-                this.maxHp = 25 + (round * 20);
+                this.speed = 1.6 + (round * 0.04);
+                this.maxHp = 30 + (round * 25);
                 this.hp = this.maxHp;
-                this.speed = 1.6 + (round * 0.05);
+                // Variable looks
+                const types = ["📦", "🎁", "🎈", "🔮"];
+                this.icon = types[Math.floor(Math.random()*types.length)];
             }
             update() {
-                const target = pathPoints[this.targetIdx];
+                const target = waypoints[this.targetIdx];
                 const dx = target.x - this.x;
                 const dy = target.y - this.y;
                 const dist = Math.sqrt(dx*dx + dy*dy);
-                const step = this.speed * gameSpeed;
+                const step = this.speed * playSpeed;
 
                 if (dist < step) {
                     this.targetIdx++;
-                    if (this.targetIdx >= pathPoints.length) {
+                    if (this.targetIdx >= waypoints.length) {
                         lives -= 10;
-                        this.hp = -100;
-                        updateStats();
-                        if (lives <= 0) doGameOver();
+                        this.hp = -1000;
+                        updateUI();
+                        if (lives <= 0) gameOver();
                     }
                 } else {
                     this.x += (dx/dist) * step;
@@ -304,14 +396,15 @@
                 }
             }
             draw() {
-                ctx.font = "28px Arial";
+                ctx.font = "32px Arial";
                 ctx.textAlign = "center";
-                ctx.fillText("📦", this.x, this.y + 10);
+                ctx.textBaseline = "middle";
+                ctx.fillText(this.icon, this.x, this.y + 5);
                 // Health bar
-                ctx.fillStyle = "#c0392b";
-                ctx.fillRect(this.x - 18, this.y - 20, 36, 4);
+                ctx.fillStyle = "rgba(0,0,0,0.5)";
+                ctx.fillRect(this.x - 20, this.y - 25, 40, 5);
                 ctx.fillStyle = "#2ecc71";
-                ctx.fillRect(this.x - 18, this.y - 20, 36 * (Math.max(0, this.hp/this.maxHp)), 4);
+                ctx.fillRect(this.x - 20, this.y - 25, 40 * (Math.max(0, this.hp/this.maxHp)), 5);
             }
         }
 
@@ -320,46 +413,42 @@
                 this.gx = gx; this.gy = gy;
                 this.x = gx * TILE_SIZE + TILE_SIZE/2;
                 this.y = gy * TILE_SIZE + TILE_SIZE/2;
-                this.data = JSON.parse(JSON.stringify(data)); // Clone data
+                this.data = JSON.parse(JSON.stringify(data));
                 this.level = 1;
-                this.timer = 0;
+                this.cd = 0;
             }
             update() {
-                if (this.timer > 0) this.timer -= gameSpeed;
-                if (this.timer <= 0) {
+                if (this.cd > 0) this.cd -= playSpeed;
+                if (this.cd <= 0) {
                     const target = enemies.find(e => Math.sqrt((e.x-this.x)**2 + (e.y-this.y)**2) < this.data.range);
                     if (target) {
                         projectiles.push(new Projectile(this.x, this.y, target, this.data.damage, this.data.color));
-                        this.timer = this.data.rate;
+                        this.cd = this.data.rate;
                     }
                 }
             }
             draw() {
-                // Drawing actual visible Fighter square
                 ctx.save();
-                ctx.globalAlpha = 0.75; // Semi-transparent effect requested
-                ctx.fillStyle = this.data.color;
-                // Rounded square background
-                ctx.beginPath();
-                ctx.roundRect(this.x - 18, this.y - 18, 36, 36, 8);
-                ctx.fill();
-                ctx.strokeStyle = "rgba(255,255,255,0.5)";
-                ctx.lineWidth = 2;
-                ctx.stroke();
+                // "Seethrough" Effect: Glow + Alpha
+                ctx.shadowBlur = activeFighter === this ? 15 : 0;
+                ctx.shadowColor = this.data.color;
+                ctx.globalAlpha = 0.65; // High visibility seethrough
                 
-                // Icon
+                ctx.fillStyle = this.data.color;
+                ctx.beginPath();
+                ctx.roundRect(this.x-18, this.y-18, 36, 36, 8);
+                ctx.fill();
+                
+                ctx.globalAlpha = 1.0;
                 ctx.font = "28px Arial";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
-                ctx.globalAlpha = 1.0; 
                 ctx.fillText(this.data.icon, this.x, this.y + 2);
 
-                // Range visualization
-                if (activeSelection === this) {
+                if (activeFighter === this) {
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, this.data.range, 0, Math.PI*2);
                     ctx.strokeStyle = "rgba(255,255,255,0.2)";
-                    ctx.lineWidth = 1;
                     ctx.stroke();
                 }
                 ctx.restore();
@@ -367,17 +456,16 @@
         }
 
         class Projectile {
-            constructor(x, y, target, dmg, color) {
+            constructor(x, y, target, dmg, col) {
                 this.x = x; this.y = y; this.target = target;
-                this.dmg = dmg; this.color = color;
+                this.dmg = dmg; this.col = col;
                 this.dead = false;
             }
             update() {
                 const dx = this.target.x - this.x;
                 const dy = this.target.y - this.y;
                 const dist = Math.sqrt(dx*dx + dy*dy);
-                const step = 9 * gameSpeed;
-
+                const step = 10 * playSpeed;
                 if (dist < step) {
                     this.target.hp -= this.dmg;
                     this.dead = true;
@@ -387,46 +475,45 @@
                 }
             }
             draw() {
-                ctx.fillStyle = this.color;
-                ctx.beginPath(); ctx.arc(this.x, this.y, 5, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = this.col;
+                ctx.beginPath(); ctx.arc(this.x, this.y, 6, 0, Math.PI*2); ctx.fill();
             }
         }
 
         // --- Interaction ---
 
         canvas.addEventListener('mousedown', (e) => {
+            if (!isRunning) return;
             const rect = canvas.getBoundingClientRect();
             const gx = Math.floor((e.clientX - rect.left) / TILE_SIZE);
             const gy = Math.floor((e.clientY - rect.top) / TILE_SIZE);
 
-            // Check if clicking existing fighter
-            const clickedF = fighters.find(f => f.gx === gx && f.gy === gy);
-            if (clickedF) {
-                openUpgrade(clickedF);
+            // 1. Selector Upgrade
+            const existing = fighters.find(f => f.gx === gx && f.gy === gy);
+            if (existing) {
+                openUpgradePanel(existing);
                 return;
             }
 
-            // Placement logic
-            if (selectedShopIdx !== -1) {
-                const data = FIGHTER_DATA[selectedShopIdx];
-                if (gold >= data.cost && !isPath(gx, gy) && !fighters.some(f=>f.gx===gx && f.gy===gy)) {
+            // 2. Buy new
+            if (shopSelectionIdx !== -1) {
+                const data = FIGHTER_LIB[shopSelectionIdx];
+                if (gold >= data.cost && !isPath(gx, gy)) {
                     gold -= data.cost;
                     fighters.push(new Fighter(gx, gy, data));
-                    updateStats();
+                    updateUI();
+                    spawnFloatText("-" + data.cost, gx*TILE_SIZE+20, gy*TILE_SIZE, "#ff4d4d");
                 }
             }
         });
 
         function isPath(gx, gy) {
-            // Simplified path check for the winding road
             const px = gx * TILE_SIZE + TILE_SIZE/2;
             const py = gy * TILE_SIZE + TILE_SIZE/2;
-            // Check distance to all path line segments
-            for(let i=0; i<pathPoints.length-1; i++) {
-                const p1 = pathPoints[i];
-                const p2 = pathPoints[i+1];
-                const d = distToSegment({x:px, y:py}, p1, p2);
-                if (d < TILE_SIZE * 0.6) return true;
+            for(let i=0; i<waypoints.length-1; i++) {
+                const p1 = waypoints[i], p2 = waypoints[i+1];
+                const dist = distToSegment({x:px, y:py}, p1, p2);
+                if (dist < TILE_SIZE * 0.7) return true;
             }
             return false;
         }
@@ -439,113 +526,94 @@
             return Math.sqrt((p.x - (v.x + t*(w.x-v.x)))**2 + (p.y - (v.y + t*(w.y-v.y)))**2);
         }
 
-        function openUpgrade(f) {
-            activeSelection = f;
-            selectedShopIdx = -1;
-            document.querySelectorAll('.shop-item').forEach(el => el.classList.remove('selected'));
-            
-            const panel = document.getElementById('upgrade-panel');
-            panel.style.display = 'flex';
-            document.getElementById('u-name').innerText = f.data.name;
-            document.getElementById('u-stats').innerHTML = `Level: ${f.level}<br>Dmg: ${Math.round(f.data.damage)} | Range: ${Math.round(f.data.range)}`;
-            document.getElementById('u-cost').innerText = f.level * 60;
-        }
+        // --- Systems ---
 
-        function upgradeActiveFighter() {
-            if (!activeSelection) return;
-            const cost = activeSelection.level * 60;
-            if (gold >= cost) {
-                gold -= cost;
-                activeSelection.level++;
-                activeSelection.data.damage *= 1.4;
-                activeSelection.data.range += 10;
-                activeSelection.data.rate *= 0.92;
-                openUpgrade(activeSelection); // Refresh panel
-                updateStats();
-            }
-        }
-
-        function closeUpgrade() {
-            activeSelection = null;
-            document.getElementById('upgrade-panel').style.display = 'none';
-        }
-
-        // --- Game System ---
-
-        function startWave() {
-            if (activeWave) return;
-            activeWave = true;
-            spawning = true;
-            let count = 10 + round * 5;
-            let spawned = 0;
+        function spawnWave() {
+            waveActive = true;
+            let count = 8 + round * 6;
+            let current = 0;
             const timer = setInterval(() => {
-                if (isGameOver) { clearInterval(timer); return; }
+                if (lives <= 0) { clearInterval(timer); return; }
                 enemies.push(new Enemy());
-                spawned++;
-                if (spawned >= count) {
+                current++;
+                if (current >= count) {
                     clearInterval(timer);
-                    spawning = false;
+                    const checker = setInterval(() => {
+                        if (enemies.length === 0) {
+                            clearInterval(checker);
+                            waveActive = false;
+                            round++;
+                            gold += 75; // Wave bonus
+                            updateUI();
+                        }
+                    }, 500);
                 }
-            }, 800 / gameSpeed);
+            }, 800 / playSpeed);
         }
 
-        function doGameOver() {
-            isGameOver = true;
+        function gameOver() {
+            isRunning = false;
             document.getElementById('game-over').style.display = 'flex';
             document.getElementById('final-round').innerText = round;
         }
 
-        function gameLoop() {
-            if (isGameOver) return;
-            ctx.clearRect(0,0, canvas.width, canvas.height);
-            
-            // Draw Grass
+        function drawMap() {
+            // Grass Tiling
             for(let y=0; y<GRID_H; y++) {
                 for(let x=0; x<GRID_W; x++) {
                     ctx.fillStyle = (x+y)%2===0 ? "#2ecc71" : "#27ae60";
                     ctx.fillRect(x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE, TILE_SIZE);
                 }
             }
+            // Side Clutter (Lava/Ocean look on edges)
+            ctx.fillStyle = "#3498db";
+            ctx.fillRect(0,0, 30, canvas.height);
 
-            // Draw Path
+            // Path
             ctx.strokeStyle = "#8b4513";
-            ctx.lineWidth = TILE_SIZE * 0.9;
+            ctx.lineWidth = TILE_SIZE * 0.95;
             ctx.lineCap = "round";
             ctx.lineJoin = "round";
             ctx.beginPath();
-            ctx.moveTo(pathPoints[0].x, pathPoints[0].y);
-            pathPoints.forEach(p => ctx.lineTo(p.x, p.y));
+            ctx.moveTo(waypoints[0].x, waypoints[0].y);
+            waypoints.forEach(p => ctx.lineTo(p.x, p.y));
             ctx.stroke();
+            
+            ctx.strokeStyle = "#a0522d";
+            ctx.lineWidth = TILE_SIZE * 0.8;
+            ctx.stroke();
+        }
 
-            // Fighters
+        function loop() {
+            if (!isRunning) return;
+            ctx.clearRect(0,0, canvas.width, canvas.height);
+            
+            drawMap();
+
             fighters.forEach(f => { f.update(); f.draw(); });
 
-            // Enemies
             enemies = enemies.filter(e => e.hp > 0);
             enemies.forEach(e => {
                 e.update(); e.draw();
-                if (e.hp <= 0 && e.hp > -90) { gold += 5; updateStats(); }
+                if (e.hp <= 0 && e.hp > -900) { 
+                    gold += 6; 
+                    updateUI(); 
+                    spawnFloatText("+6", e.x, e.y, var(--gold)); 
+                }
             });
 
-            // Projectiles
             projectiles = projectiles.filter(p => !p.dead && p.target.hp > 0);
             projectiles.forEach(p => { p.update(); p.draw(); });
 
-            // Next Wave
-            if (!spawning && enemies.length === 0) {
-                if (activeWave) {
-                    activeWave = false; 
-                    round++; 
-                    gold += 50; 
-                    updateStats();
-                }
-                startWave();
+            if (!waveActive && enemies.length === 0) {
+                spawnWave();
             }
 
-            requestAnimationFrame(gameLoop);
+            requestAnimationFrame(loop);
         }
 
-        init();
+        // Initialize
+        setupShop();
     </script>
 </body>
 </html>
