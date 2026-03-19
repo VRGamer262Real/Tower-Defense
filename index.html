@@ -359,7 +359,7 @@
                 this.hp = this.maxHp;
                 this.spd = 2.0 + (round * 0.05);
                 this.icon = Math.random() > 0.85 ? "🧱" : "📦";
-                if (this.icon === "🧱") { this.hp *= 3; this.maxHp *= 3; this.spd *= 0.6; }
+                if (this.icon === "🧱") { this.hp *= 3; this.maxHp *= 3; this.spd *= 0.7; }
             }
             update() {
                 const g = path[this.targetIdx];
@@ -416,7 +416,7 @@
                 const dx=this.t.x-this.x, dy=this.t.y-this.y, d=Math.hypot(dx,dy), step=22*gameSpeed;
                 if (d < step) {
                     this.t.hp -= this.dmg; 
-                    gold += 1; // 1 COIN PER HIT
+                    gold += 0.5; // 1 COIN PER HIT
                     updateStats();
                     this.dead = true;
                 } else { this.x+=(dx/d)*step; this.y+=(dy/d)*step; }
